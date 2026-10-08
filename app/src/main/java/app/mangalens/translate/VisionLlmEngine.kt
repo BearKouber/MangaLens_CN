@@ -47,7 +47,11 @@ class VisionLlmEngine(
 
     val label: String get() = LlmHttp.providerLabel(settings)
 
-    val cacheNamespace: String get() = "Vision:" + label + ":" + settings.effectiveModel()
+    val cacheNamespace: String get() = "Vision:" + label + ":" + settings.effectiveModel() + ":" + settings.targetLang.name
+
+    init {
+        LlmEngine.aim(settings, glossary, cast)
+    }
 
     /**
      * @param onBubble receives each answered region the moment the model
@@ -120,7 +124,7 @@ class VisionLlmEngine(
             val stream = if (onBubble == null) null else BubbleStream()
             val streamed = HashSet<Int>()
             val raw = LlmHttp.complete(
-                settings, SYSTEM_PROMPT, stable, listOf(jpegB64) + crops.map { it.second }, page,
+                settings, LlmEngine.systemPrompt(SYSTEM_PROMPT, settings.targetLang), stable, listOf(jpegB64) + crops.map { it.second }, page,
                 effort = LlmHttp.effortLevel(settings, vision = true),
                 vision = true,
                 onDelta = if (stream == null) null else { delta ->

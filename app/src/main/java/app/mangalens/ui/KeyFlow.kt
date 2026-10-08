@@ -41,6 +41,7 @@ import app.mangalens.settings.CaptureMode
 import app.mangalens.settings.LlmProvider
 import app.mangalens.settings.SettingsRepository
 import app.mangalens.settings.SourceLang
+import app.mangalens.settings.TargetLang
 import app.mangalens.translate.LlmHttp
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -76,6 +77,9 @@ internal interface SettingsSink {
     /** Night reading: paint the white between a manhwa's panels dark, and how dark. */
     fun setDarkGaps(v: Boolean) {}
     fun setGapShade(v: ShadeLevel) {}
+
+    /** The language balloons are lettered in. */
+    fun setTargetLang(v: TargetLang) {}
 }
 
 /**
@@ -107,6 +111,7 @@ internal class RepoSink(private val scope: CoroutineScope, private val repo: Set
     override fun setSmartScroll(v: Boolean) = write { setSmartScroll(v) }
     override fun setDarkGaps(v: Boolean) = write { setDarkGaps(v) }
     override fun setGapShade(v: ShadeLevel) = write { setGapShade(v) }
+    override fun setTargetLang(v: TargetLang) = write { setTargetLang(v) }
 }
 
 /**

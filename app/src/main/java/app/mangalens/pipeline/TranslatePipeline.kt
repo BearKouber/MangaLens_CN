@@ -966,7 +966,7 @@ class TranslatePipeline(
             return Gap(emptyList(), e)
         }
         return Gap(missing.mapIndexedNotNull { k, b ->
-            val en = JunkFilter.accept(b.text, outcome.texts.getOrElse(k) { "" }) ?: return@mapIndexedNotNull null
+            val en = JunkFilter.accept(b.text, outcome.texts.getOrElse(k) { "" }, settings.targetLang) ?: return@mapIndexedNotNull null
             PageItem(Rect(b.box), ItemKind.SPEECH, b.text, en, vertical = b.vertical)
         })
     }
@@ -1067,7 +1067,7 @@ class TranslatePipeline(
                     emit(
                         texts.entries.sortedBy { it.key }.mapNotNull { (k, en) ->
                             val b = bubbles[idx[k]]
-                            val gated = JunkFilter.accept(b.text, en) ?: return@mapNotNull null
+                            val gated = JunkFilter.accept(b.text, en, settings.targetLang) ?: return@mapNotNull null
                             renderBubble(bitmap, b.box, gated, b.text, b.vertical, b.kind, detected)
                         }
                     )
@@ -1076,7 +1076,7 @@ class TranslatePipeline(
         )
         val rendered = idx.mapIndexedNotNull { k, i ->
             val b = bubbles[i]
-            val gated = JunkFilter.accept(b.text, outcome.texts.getOrElse(k) { "" })
+            val gated = JunkFilter.accept(b.text, outcome.texts.getOrElse(k) { "" }, settings.targetLang)
                 ?: return@mapIndexedNotNull null
             renderBubble(bitmap, b.box, gated, b.text, b.vertical, b.kind, detected)
         }
@@ -1118,7 +1118,7 @@ class TranslatePipeline(
         }
 
         return Gap(missing.mapIndexedNotNull { k, i ->
-            val gated = JunkFilter.accept(bubbles[i].text, outcome.texts.getOrElse(k) { "" })
+            val gated = JunkFilter.accept(bubbles[i].text, outcome.texts.getOrElse(k) { "" }, settings.targetLang)
                 ?: return@mapIndexedNotNull null
             VisionLlmEngine.VisionBubble(i, 0, 0, 0, 0, bubbles[i].text, gated, sfx = false)
         })

@@ -1,5 +1,6 @@
 package app.mangalens.overlay
 
+import app.mangalens.ocr.Script
 import kotlin.math.sqrt
 
 /**
@@ -24,6 +25,66 @@ object TypeSet {
 
     private val WS = Regex("\\s+")
 
+    /** Kinsoku: marks that may not begin a line, so they ride on the character before. */
+    private const val NO_START = "、。，．,.!?！？…‥—―ー々）」』】〉》〕｝〙〗’”：；:;~～・ぁぃぅぇぉっゃゅょゎァィゥェォッャュョヮ"
+
+    /** Marks that may not end a line, so they ride on the character after. */
+    private const val NO_END = "（「『【〈《〔｛〘〖‘“"
+
+    /**
+     * The units a line may break between, and whether a space sits before
+     * each. Latin and Korean break at spaces. Chinese and Japanese are set
+     * without them and break between characters — treating a whole sentence
+     * as one word would shrink it to the smallest type in every balloon.
+     */
+    class Words(text: String) {
+        val list: List<String>
+        private val spaced: BooleanArray
+
+        init {
+            val out = ArrayList<String>()
+            val gaps = ArrayList<Boolean>()
+            for ((n, chunk) in text.trim().split(WS).filter { it.isNotEmpty() }.withIndex()) {
+                val cur = StringBuilder()
+                var first = true
+                fun push() {
+                    out.add(cur.toString())
+                    gaps.add(first && n > 0)
+                    first = false
+                    cur.setLength(0)
+                }
+                for (ch in chunk) {
+                    val prev = cur.lastOrNull()
+                    if (prev != null && ch !in NO_START && prev !in NO_END &&
+                        (breaksAround(ch) || breaksAround(prev))
+                    ) {
+                        push()
+                    }
+                    cur.append(ch)
+                }
+                if (cur.isNotEmpty()) push()
+            }
+            list = out
+            spaced = gaps.toBooleanArray()
+        }
+
+        val size: Int get() = list.size
+
+        fun isEmpty(): Boolean = list.isEmpty()
+
+        /** Words [a] until [b] (exclusive) as they read on one line. */
+        fun line(a: Int, b: Int): String {
+            val sb = StringBuilder(list[a])
+            for (i in a + 1 until b) {
+                if (spaced[i]) sb.append(' ')
+                sb.append(list[i])
+            }
+            return sb.toString()
+        }
+
+        private fun breaksAround(c: Char) = Script.isHan(c) || Script.isKana(c) || c in NO_END
+    }
+
     /**
      * Beyond this the width table's quadratic measure calls stop being free.
      * Text that long is a caption wall, not balloon dialogue, and nobody
@@ -47,9 +108,9 @@ object TypeSet {
      * exceed it.
      */
     fun breakLines(text: String, measure: (String) -> Float, maxWidth: Float): List<String> {
-        val words = text.trim().split(WS).filter { it.isNotEmpty() }
-        if (words.isEmpty()) return emptyList()
-        if (words.size == 1) return words
+        val words = Words(text)
+        if (words.size == 0) return emptyList()
+        if (words.size == 1) return words.list
 
         val greedy = greedyBreak(words, measure, maxWidth)
         val k = greedy.size
@@ -60,12 +121,7 @@ object TypeSet {
         // widths — kerning and space width belong to the paint, not to us.
         val width = Array(m) { FloatArray(m) }
         for (a in 0 until m) {
-            val sb = StringBuilder(words[a])
-            width[a][a] = measure(words[a])
-            for (b in a + 1 until m) {
-                sb.append(' ').append(words[b])
-                width[a][b] = measure(sb.toString())
-            }
+            for (b in a until m) width[a][b] = measure(words.line(a, b + 1))
         }
 
         // The chord of an ellipse sampled at each line's height: full width
@@ -105,7 +161,7 @@ object TypeSet {
         var end = m
         for (j in k downTo 1) {
             val start = cut[j][end]
-            lines[j - 1] = words.subList(start, end).joinToString(" ")
+            lines[j - 1] = words.line(start, end)
             end = start
         }
         return lines
@@ -133,6 +189,8 @@ object TypeSet {
      * outline.
      */
     fun hyphenate(text: String, measure: (String) -> Float, maxWidth: Float, eager: Boolean = false): String {
+        // Chinese and Japanese already break between characters; a hyphen there is a typo.
+        if (text.any { Script.isHan(it) || Script.isKana(it) }) return text
         val words = text.trim().split(WS).filter { it.isNotEmpty() }
         if (words.none { measure(it) > maxWidth }) return text
         val shortest = if (eager) MIN_HYPHENATED_EAGER else MIN_HYPHENATED
@@ -309,19 +367,14 @@ object TypeSet {
      * arithmetic, cheap enough to try dozens of line profiles per balloon.
      */
     class Shaper(text: String, measure: (String) -> Float) {
-        val words: List<String> = text.trim().split(WS).filter { it.isNotEmpty() }
+        val words = Words(text)
 
         /** width[a][b]: the joined width of words a..b, measured as one string. */
         private val width: Array<FloatArray>? = if (words.size in 1..DP_WORD_LIMIT) {
             val m = words.size
             Array(m) { a ->
                 val row = FloatArray(m)
-                val sb = StringBuilder(words[a])
-                row[a] = measure(words[a])
-                for (b in a + 1 until m) {
-                    sb.append(' ').append(words[b])
-                    row[b] = measure(sb.toString())
-                }
+                for (b in a until m) row[b] = measure(words.line(a, b + 1))
                 row
             }
         } else {
@@ -387,7 +440,7 @@ object TypeSet {
             var end = m
             for (j in k downTo 1) {
                 val start = cut[j][end]
-                lines[j - 1] = words.subList(start, end).joinToString(" ")
+                lines[j - 1] = words.line(start, end)
                 end = start
             }
             return Fit(lines, best[k][m])
@@ -395,22 +448,19 @@ object TypeSet {
     }
 
     private fun greedyBreak(
-        words: List<String>,
+        words: Words,
         measure: (String) -> Float,
         maxWidth: Float,
     ): List<String> {
         val lines = ArrayList<String>()
-        var line = words[0]
+        var start = 0
         for (i in 1 until words.size) {
-            val grown = line + " " + words[i]
-            if (measure(grown) <= maxWidth) {
-                line = grown
-            } else {
-                lines.add(line)
-                line = words[i]
+            if (measure(words.line(start, i + 1)) > maxWidth) {
+                lines.add(words.line(start, i))
+                start = i
             }
         }
-        lines.add(line)
+        lines.add(words.line(start, words.size))
         return lines
     }
 }

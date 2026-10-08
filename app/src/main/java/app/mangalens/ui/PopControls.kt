@@ -502,6 +502,7 @@ internal data class PopTile<T>(val value: T, val title: String, val caption: Str
  * red and wears a check, so the choice shows three ways at once. A short
  * last row stretches across the width rather than leaving a hole, so five
  * choices in two columns end on one wide tile, not a lopsided single.
+ * [leadRow] tiles, when set, get a row of their own at the top.
  */
 @Composable
 internal fun <T> PopTiles(
@@ -511,9 +512,11 @@ internal fun <T> PopTiles(
     columns: Int,
     modifier: Modifier = Modifier,
     minHeight: Dp = 72.dp,
+    leadRow: Int = 0,
 ) {
+    val rows = listOfNotNull(options.take(leadRow).ifEmpty { null }) + options.drop(leadRow).chunked(columns.coerceAtLeast(1))
     Column(modifier.fillMaxWidth().selectableGroup(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        options.chunked(columns.coerceAtLeast(1)).forEach { row ->
+        rows.forEach { row ->
             Row(
                 Modifier.fillMaxWidth().height(IntrinsicSize.Min),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),

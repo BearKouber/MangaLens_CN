@@ -2,6 +2,7 @@ package app.mangalens.translate
 
 import android.content.Context
 import android.content.SharedPreferences
+import app.mangalens.settings.TargetLang
 import org.json.JSONObject
 
 /**
@@ -34,6 +35,24 @@ class GlossaryStore(context: Context) {
         if (prefs.contains(KEY)) prefs.edit().remove(KEY).apply()
     }
 
+    /**
+     * The language the stored values are written in. Names are obeyed
+     * exactly, so English names learned for an English page would be pasted
+     * into a Chinese one; each target keeps its own copy. English uses the
+     * original keys, so memory written before targets existed stays English.
+     */
+    private var target = TargetLang.EN
+
+    /** Switches to another target language's copy, saving the current one first. */
+    @Synchronized
+    fun setTarget(t: TargetLang) {
+        if (t == target) return
+        if (loaded) persist()
+        target = t
+        terms.clear()
+        loaded = false
+    }
+
     /** Switches to another work's glossary, saving the current one first. */
     @Synchronized
     fun setScope(id: String) {
@@ -47,7 +66,9 @@ class GlossaryStore(context: Context) {
     /** Forgets a work's glossary entirely, when it is evicted. */
     @Synchronized
     fun dropScope(id: String) {
-        prefs.edit().remove(keyFor(id)).apply()
+        val edit = prefs.edit()
+        for (t in TargetLang.entries) edit.remove(keyFor(id, t))
+        edit.apply()
         if (scope == id) {
             terms.clear()
             loaded = true
@@ -126,7 +147,10 @@ class GlossaryStore(context: Context) {
         write(scope, LinkedHashMap(terms))
     }
 
-    private fun keyFor(id: String) = "$KEY:$id"
+    // mergeScope folds only the current target's copy; another
+    // target's pending names stay pending until that target is used again.
+    private fun keyFor(id: String, t: TargetLang = target) =
+        "$KEY:$id" + if (t == TargetLang.EN) "" else "@" + t.name
 
     private fun read(id: String): LinkedHashMap<String, String> {
         val out = LinkedHashMap<String, String>()

@@ -3,6 +3,7 @@ package app.mangalens.translate
 import app.mangalens.ocr.BubbleKind
 import app.mangalens.settings.AppSettings
 import app.mangalens.settings.SourceLang
+import app.mangalens.settings.TargetLang
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
@@ -32,7 +33,7 @@ class LlmEngine(
     val label: String get() = LlmHttp.providerLabel(settings)
 
     /** Cache namespace: the provider and the model, so a new model never replays an old one's lines. */
-    val cacheNamespace: String get() = label + ":" + settings.effectiveModel()
+    val cacheNamespace: String get() = label + ":" + settings.effectiveModel() + ":" + settings.targetLang.name
 
     /** Translates every item as dialogue; the result matches [items] in size and order. */
     suspend fun translate(items: List<String>, lang: SourceLang): List<String> =
@@ -84,7 +85,7 @@ class LlmEngine(
 
         val stream = if (onEntry == null) null else BubbleStream()
         val raw = LlmHttp.complete(
-            settings, SYSTEM_PROMPT, stable, emptyList(), page,
+            settings, systemPrompt(SYSTEM_PROMPT, settings.targetLang), stable, emptyList(), page,
             effort = LlmHttp.effortLevel(settings, vision = false),
             vision = false,
             onDelta = if (stream == null) null else { delta ->
@@ -131,7 +132,47 @@ class LlmEngine(
         out
     }
 
+    init {
+        aim(settings, glossary, cast)
+    }
+
     companion object {
+        private var aimed: TargetLang? = null
+
+        /**
+         * Points the series memory at the chosen output language before a
+         * request takes it. The rolling story is cleared on a change rather
+         * than kept: lines in the old language would pull the next page
+         * back into it.
+         */
+        @Synchronized
+        internal fun aim(settings: AppSettings, glossary: GlossaryStore?, cast: CastBook?) {
+            val t = settings.targetLang
+            glossary?.setTarget(t)
+            cast?.setTarget(t)
+            if (t == aimed) return
+            if (aimed != null) StoryContext.reset()
+            aimed = t
+        }
+
+        /**
+         * The prompts are written for English, which is what they were tuned
+         * on. Another target keeps every rule and appends one that moves the
+         * output language and swaps English-only conventions for that
+         * language's own — rewriting each prompt per language would fork
+         * them six ways for no better translation.
+         */
+        internal fun systemPrompt(base: String, target: TargetLang): String {
+            if (target == TargetLang.EN) return base
+            val name = target.englishName
+            return base.replace("already in English", "already in $name").replace("already English", "already $name") +
+                "\n\n" + """
+OUTPUT LANGUAGE — this overrides everything above
+Write every "en" value, every "new_terms" value, and every name in "who" and "characters" in $name, not English. The field is still called "en"; only its language changes.
+Wherever the rules above give English-specific advice (contractions, CAPS onomatopoeia, romanizing names and honorifics, subjectless English phrasing, stammer and vowel-stretch spelling, the ban on hanzi, kana or hangul), follow what a professional $name scanlation does instead: natural spoken $name, the punctuation $name comics use, $name onomatopoeia for sound effects, and names written the way $name readers know them.
+""".trim()
+        }
+
         internal val SYSTEM_PROMPT = """
 You are an elite manga/manhwa/manhua localization translator producing text for typeset speech bubbles. You receive the series memory as JSON — a glossary of established names/terms and the cast of characters met so far — followed by one comic page as JSON: the story up to this page and its bubbles in reading order.
 "source_language" is a guess from settings. Aggregator sites often serve raws already translated once (Spanish is common) — translate whatever language the text actually is into the same natural English. If a bubble is already English, answer it with "kind":"skip".

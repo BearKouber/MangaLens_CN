@@ -8,6 +8,7 @@ import app.mangalens.settings.AiReasoning
 import app.mangalens.settings.AppSettings
 import app.mangalens.settings.LlmProvider
 import app.mangalens.settings.SourceLang
+import app.mangalens.settings.TargetLang
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import kotlin.math.abs
@@ -81,7 +82,11 @@ class PageReader internal constructor(
 
     val label: String get() = LlmHttp.providerLabel(settings)
 
-    val cacheNamespace: String get() = "Read:" + label + ":" + settings.effectiveModel()
+    val cacheNamespace: String get() = "Read:" + label + ":" + settings.effectiveModel() + ":" + settings.targetLang.name
+
+    init {
+        LlmEngine.aim(settings, glossary, cast)
+    }
 
     /**
      * Starts reading [bitmap] in [scope] and returns at once. The page is
@@ -400,12 +405,12 @@ class PageReader internal constructor(
          */
         fun body(model: String): JSONObject {
             val effort = LlmHttp.effortLevel(settings, vision = true)
-            val body = LlmHttp.geminiBody(settings, SYSTEM_PROMPT, stable, listOf(jpeg), pageText, effort, vision = true, model = model)
+            val body = LlmHttp.geminiBody(settings, LlmEngine.systemPrompt(SYSTEM_PROMPT, settings.targetLang), stable, listOf(jpeg), pageText, effort, vision = true, model = model)
             body.getJSONObject("generationConfig").put("responseSchema", JSONObject(RESPONSE_SCHEMA))
             return body
         }
 
-        fun item(o: JSONObject): PageItem? = toItem(o, width, height)
+        fun item(o: JSONObject): PageItem? = toItem(o, width, height, settings.targetLang)
     }
 
     /** A read in flight: the items so far, and how it ended once it has. */
@@ -653,7 +658,7 @@ class PageReader internal constructor(
          * to 0-1000 of the image it saw — which, being the whole page
          * scaled, maps straight onto the original page size.
          */
-        internal fun toItem(o: JSONObject, width: Int, height: Int): PageItem? {
+        internal fun toItem(o: JSONObject, width: Int, height: Int, target: TargetLang = TargetLang.EN): PageItem? {
             // One line: a break copied from the source's columns would be set
             // as a hard break in the middle of the English.
             val en = o.optString("en", "").trim().replace(LINE_BREAKS, " ")
@@ -679,7 +684,7 @@ class PageReader internal constructor(
                 box = box,
                 kind = kind,
                 src = src,
-                en = englishOnly(en),
+                en = englishOnly(en, target),
                 who = o.optString("who", "").trim().take(24),
                 vertical = isVertical(src, box.width(), box.height()),
                 loud = (kind == ItemKind.SPEECH || kind == ItemKind.THOUGHT) && isLoud(en),
@@ -722,7 +727,9 @@ class PageReader internal constructor(
          * line really is English: a line with no Latin letters is left as
          * the model wrote it.
          */
-        internal fun englishOnly(en: String): String {
+        internal fun englishOnly(en: String, target: TargetLang = TargetLang.EN): String {
+            // Kana and hangul are the text itself in a Japanese or Korean line.
+            if (target == TargetLang.JA || target == TargetLang.KO) return en
             if (en.none { it in 'A'..'Z' || it in 'a'..'z' }) return en
             val kept = en.filter { !(Script.isKana(it) || Script.isHangul(it)) }
                 // A sound set between asterisks like a stage direction

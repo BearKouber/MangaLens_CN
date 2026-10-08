@@ -74,6 +74,7 @@ import app.mangalens.settings.AppSettings
 import app.mangalens.settings.CaptureMode
 import app.mangalens.settings.LlmProvider
 import app.mangalens.settings.SourceLang
+import app.mangalens.settings.TargetLang
 import app.mangalens.translate.LlmHttp
 import app.mangalens.translate.ModelCatalog
 import kotlin.math.roundToInt
@@ -255,6 +256,23 @@ private fun ReadingSection(settings: AppSettings, sink: SettingsSink, columns: I
             SourceLang.JA -> "Reading Japanese (manga)."
             SourceLang.ZH -> "Reading Chinese (manhua)."
         }
+    )
+    Spacer(Modifier.height(12.dp))
+    Text("Translate into", style = MaterialTheme.typography.titleMedium, color = pop.ink)
+    Spacer(Modifier.height(8.dp))
+    PopTiles(
+        listOf(
+            PopTile(TargetLang.EN, "English", glyph = "A"),
+            PopTile(TargetLang.ZH_HANS, "简体中文", glyph = "简"),
+            PopTile(TargetLang.ZH_HANT, "繁體中文", glyph = "繁"),
+            PopTile(TargetLang.JA, "日本語", glyph = "あ"),
+            PopTile(TargetLang.KO, "한국어", glyph = "가"),
+            PopTile(TargetLang.RU, "Русский", glyph = "Я"),
+        ),
+        selected = settings.targetLang,
+        onSelect = sink::setTargetLang,
+        columns = columns,
+        leadRow = 2,
     )
     Spacer(Modifier.height(12.dp))
     val handsFree = settings.mode == CaptureMode.AUTO

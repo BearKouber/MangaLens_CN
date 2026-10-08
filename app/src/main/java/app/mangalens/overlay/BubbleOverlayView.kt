@@ -1814,7 +1814,7 @@ class BubbleOverlayView(context: Context) : View(context) {
         var best = listOf(text)
         var bestSize = 0f
         for (k in 1..min(shaper.words.size, 3)) {
-            val lines = if (k == 1) listOf(shaper.words.joinToString(" ")) else narrowest(shaper, k) ?: continue
+            val lines = if (k == 1) listOf(shaper.words.line(0, shaper.words.size)) else narrowest(shaper, k) ?: continue
             if (lines.size != k) continue
             var widest = 0f
             for (line in lines) widest = max(widest, measure(line))

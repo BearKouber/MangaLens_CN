@@ -21,6 +21,33 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 
 enum class LlmProvider { ANTHROPIC, OPENAI, GEMINI, OPENROUTER, CUSTOM }
+
+/**
+ * The language balloons are lettered in. [englishName] is how the AI
+ * prompts name it.
+ */
+enum class TargetLang(val englishName: String) {
+    EN("English"),
+    ZH_HANS("Simplified Chinese"),
+    ZH_HANT("Traditional Chinese"),
+    JA("Japanese"),
+    KO("Korean"),
+    RU("Russian");
+
+    /** Written without spaces between words, so lines break between characters. */
+    val cjk: Boolean get() = this == ZH_HANS || this == ZH_HANT || this == JA || this == KO
+
+    companion object {
+        /** First-run default: the phone's own language when it is one we letter in. */
+        fun forLocale(locale: java.util.Locale): TargetLang = when (locale.language) {
+            "zh" -> if (locale.script == "Hant" || locale.country in setOf("TW", "HK", "MO")) ZH_HANT else ZH_HANS
+            "ja" -> JA
+            "ko" -> KO
+            "ru" -> RU
+            else -> EN
+        }
+    }
+}
 enum class SourceLang { AUTO, KO, JA, ZH }
 enum class CaptureMode { AUTO, MANUAL }
 
@@ -58,6 +85,8 @@ data class AppSettings(
     val model: String = "",
     val customUrl: String = "",
     val sourceLang: SourceLang = SourceLang.AUTO,
+    /** The phone's own language when it is one we letter in, else English. */
+    val targetLang: TargetLang = TargetLang.forLocale(java.util.Locale.getDefault()),
     val mode: CaptureMode = CaptureMode.AUTO,
     val aiVision: AiVisionMode = AiVisionMode.AUTO,
     val aiReasoning: AiReasoning = AiReasoning.BALANCED,
@@ -135,6 +164,7 @@ private object Keys {
     val LEGACY_MODEL = stringPreferencesKey("model")
     val CUSTOM_URL = stringPreferencesKey("custom_url")
     val SOURCE_LANG = stringPreferencesKey("source_lang")
+    val TARGET_LANG = stringPreferencesKey("target_lang")
     val MODE = stringPreferencesKey("mode")
     val AI_VISION = stringPreferencesKey("ai_vision")
     val AI_REASONING = stringPreferencesKey("ai_reasoning")
@@ -293,6 +323,7 @@ internal fun settingsFromPreferences(p: Preferences, credentials: Preferences = 
         model = p[Keys.model(provider)] ?: d.model,
         customUrl = p[Keys.CUSTOM_URL] ?: d.customUrl,
         sourceLang = enumOr(p[Keys.SOURCE_LANG], d.sourceLang),
+        targetLang = enumOr(p[Keys.TARGET_LANG], d.targetLang),
         mode = enumOr(p[Keys.MODE], d.mode),
         aiVision = enumOr(p[Keys.AI_VISION], d.aiVision),
         aiReasoning = enumOr(p[Keys.AI_REASONING], d.aiReasoning),
@@ -346,6 +377,7 @@ class SettingsRepository(private val context: Context) {
     }
     suspend fun setCustomUrl(v: String) = context.settingsStore.edit { it[Keys.CUSTOM_URL] = v }
     suspend fun setSourceLang(v: SourceLang) = context.settingsStore.edit { it[Keys.SOURCE_LANG] = v.name }
+    suspend fun setTargetLang(v: TargetLang) = context.settingsStore.edit { it[Keys.TARGET_LANG] = v.name }
     suspend fun setMode(v: CaptureMode) = context.settingsStore.edit { it[Keys.MODE] = v.name }
     suspend fun setAiVision(v: AiVisionMode) = context.settingsStore.edit { it[Keys.AI_VISION] = v.name }
     suspend fun setAiReasoning(v: AiReasoning) = context.settingsStore.edit { it[Keys.AI_REASONING] = v.name }
