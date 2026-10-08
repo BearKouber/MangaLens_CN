@@ -630,11 +630,6 @@ class BubbleOverlayView(context: Context) : View(context) {
     private val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val maskPaint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
     private val patchPaint = Paint(Paint.FILTER_BITMAP_FLAG)
-    private val strokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        style = Paint.Style.STROKE
-        strokeWidth = dp(1f)
-        color = 0x2E000000
-    }
     private val debugPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
         strokeWidth = dp(1.5f)
@@ -1921,7 +1916,11 @@ class BubbleOverlayView(context: Context) : View(context) {
 
         var maxLine = 0f
         for (i in 0 until chosen.lineCount) maxLine = maxOf(maxLine, chosen.getLineWidth(i))
-        val w = (maxLine + pad * 2).coerceAtLeast(dp(40f)).coerceAtMost(boxW + pad * 2)
+        // A dialogue card covers the whole original block side to side too,
+        // so no source letters peek out at its edges.
+        val cover = if (column) 0f else b.box.width() + dp(8f)
+        val w = maxOf((maxLine + pad * 2).coerceAtLeast(dp(40f)).coerceAtMost(boxW + pad * 2), cover)
+            .coerceAtMost(screenW - dp(4f))
         // A dialogue card must bury the original block it floats on — CJK
         // runs taller than its translation, and a card sized to the text
         // leaves source lines peeking out. But burying is capped at half the
@@ -1930,7 +1929,7 @@ class BubbleOverlayView(context: Context) : View(context) {
         val h = if (column) {
             chosen.height + pad * 2
         } else {
-            maxOf(chosen.height + pad * 2, minOf(b.box.height() + dp(6f), screenH * 0.5f))
+            maxOf(chosen.height + pad * 2, minOf(b.box.height() + dp(8f), screenH * 0.5f))
         }
 
         var left = b.box.centerX() - w / 2f
@@ -2220,21 +2219,19 @@ class BubbleOverlayView(context: Context) : View(context) {
         if (fading) postInvalidateOnAnimation()
     }
 
-    /** A card's rounded ground and its hairline, if the lettering has a card. */
+    /**
+     * A card's ground, if the lettering has one: a patch of the page's own
+     * colour over the original, with no outline, so on plain paper or a
+     * balloon's white it reads as the text having been replaced.
+     */
     private fun drawGround(canvas: Canvas, p: Placed) {
         val l = p.lettering
         val card = l.card ?: return
-        val radius = dp(9f)
+        val radius = dp(4f)
         canvas.save()
         canvas.translate(0f, p.dy)
         bgPaint.color = l.cardColor
         canvas.drawRoundRect(card, radius, radius, bgPaint)
-        // The hairline must contrast with the fill it outlines, or a
-        // page-black card on a black panel has no edge at all.
-        val bg = l.cardColor
-        val lum = (Color.red(bg) * 299 + Color.green(bg) * 587 + Color.blue(bg) * 114) / 1000
-        strokePaint.color = if (lum < 140) 0x59FFFFFF else 0x2E000000
-        canvas.drawRoundRect(card, radius, radius, strokePaint)
         canvas.restore()
     }
 

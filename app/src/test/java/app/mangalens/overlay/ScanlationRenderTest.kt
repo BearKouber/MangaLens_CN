@@ -204,7 +204,7 @@ class ScanlationRenderTest {
         val rects = v.placedRects()
         assertEquals(1, rects.size)
         val card = rects[0]
-        assertTrue("cards stay sized to the text, not to the box", card.width() < 220)
+        assertTrue("a card covers the whole original block side to side", card.width() >= 220)
 
         val out = Bitmap.createBitmap(pageW, pageH, Bitmap.Config.ARGB_8888)
         Canvas(out).drawColor(Color.rgb(128, 128, 128))
