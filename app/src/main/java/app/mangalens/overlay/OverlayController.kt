@@ -1,5 +1,6 @@
 package app.mangalens.overlay
 
+import app.mangalens.tr
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.PixelFormat
@@ -342,7 +343,7 @@ class OverlayController(private val context: Context, private val listener: List
             onTap()
         }
         // Long-press is a touch gesture only; screen readers get the menu as an action.
-        ViewCompat.addAccessibilityAction(btn, "Open quick menu") { _, _ ->
+        ViewCompat.addAccessibilityAction(btn, tr("Open quick menu")) { _, _ ->
             showMenu()
             true
         }
@@ -487,32 +488,32 @@ class OverlayController(private val context: Context, private val listener: List
                     }
                 })
             }
-            item("Translate this page", R.drawable.ic_menu_bolt) { listener.onTranslateNow() }
+            item(tr("Translate this page"), R.drawable.ic_menu_bolt) { listener.onTranslateNow() }
             if (listener.isPaused()) {
-                item("Wake up (resume)", R.drawable.ic_menu_play) { listener.onTogglePause() }
+                item(tr("Wake up (resume)"), R.drawable.ic_menu_play) { listener.onTogglePause() }
             } else {
-                item("Pause for a nap", R.drawable.ic_menu_pause) { listener.onTogglePause() }
+                item(tr("Pause for a nap"), R.drawable.ic_menu_pause) { listener.onTogglePause() }
             }
             if (listener.isAutoScrolling()) {
-                item("Stop auto-scroll", R.drawable.ic_menu_pause) { listener.onToggleAutoScroll() }
+                item(tr("Stop auto-scroll"), R.drawable.ic_menu_pause) { listener.onToggleAutoScroll() }
             } else {
-                item("Auto-scroll the page", R.drawable.ic_menu_scroll) { listener.onToggleAutoScroll() }
+                item(tr("Auto-scroll the page"), R.drawable.ic_menu_scroll) { listener.onToggleAutoScroll() }
             }
             if (listener.isAutoMode()) {
-                item("Switch to tap-to-translate", R.drawable.ic_menu_tap) { listener.onToggleMode() }
+                item(tr("Switch to tap-to-translate"), R.drawable.ic_menu_tap) { listener.onToggleMode() }
             } else {
-                item("Switch to hands-free", R.drawable.ic_menu_hands_free) { listener.onToggleMode() }
+                item(tr("Switch to hands-free"), R.drawable.ic_menu_hands_free) { listener.onToggleMode() }
             }
-            item("Peek at the original (4 s)", R.drawable.ic_menu_peek) { listener.onPeek() }
+            item(tr("Peek at the original (4 s)"), R.drawable.ic_menu_peek) { listener.onPeek() }
             if (listener.isDarkGapsOn()) {
-                item("Dark gaps: on, tap to turn off", R.drawable.ic_menu_moon) { listener.onToggleDarkGaps() }
+                item(tr("Dark gaps: on, tap to turn off"), R.drawable.ic_menu_moon) { listener.onToggleDarkGaps() }
             } else {
-                item("Dark gaps between panels", R.drawable.ic_menu_moon) { listener.onToggleDarkGaps() }
+                item(tr("Dark gaps between panels"), R.drawable.ic_menu_moon) { listener.onToggleDarkGaps() }
             }
-            item("New series: forget names", R.drawable.ic_menu_book) { listener.onNewSeries() }
-            item("Tweaks", R.drawable.ic_menu_tweaks) { listener.onOpenSettings() }
+            item(tr("New series: forget names"), R.drawable.ic_menu_book) { listener.onNewSeries() }
+            item(tr("Tweaks"), R.drawable.ic_menu_tweaks) { listener.onOpenSettings() }
             col.addView(OverlayStyle.menuDivider(context))
-            item("Stop translating", R.drawable.ic_menu_stop, OverlayStyle.MENU_STOP) { listener.onStopRequested() }
+            item(tr("Stop translating"), R.drawable.ic_menu_stop, OverlayStyle.MENU_STOP) { listener.onStopRequested() }
             return col
         }
     }

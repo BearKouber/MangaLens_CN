@@ -1,5 +1,6 @@
 package app.mangalens.ui
 
+import app.mangalens.tr
 import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
@@ -149,7 +150,7 @@ internal fun SetupChecklist(
         }
         val headline: @Composable (Modifier) -> Unit = { m ->
             Text(
-                "Hi! I'm Fuki.",
+                tr("Hi! I'm Fuki."),
                 style = MaterialTheme.typography.headlineLarge.copy(
                     fontSize = 34.sp, lineHeight = 38.sp, lineBreak = LineBreak.Heading,
                 ),
@@ -168,8 +169,7 @@ internal fun SetupChecklist(
         }
         Spacer(Modifier.height(8.dp))
         Text(
-            "I letter English over raw manga, manhwa and manhua while you read in $browser. " +
-                "Two quick steps and we're off.",
+            tr("I letter English over raw manga, manhwa and manhua while you read in %s. Two quick steps and we're off.", browser),
             style = MaterialTheme.typography.bodyLarge,
             color = pop.inkSoft,
         )
@@ -179,23 +179,23 @@ internal fun SetupChecklist(
 
         Ticket(
             number = 1,
-            title = "Let me float",
+            title = tr("Let me float"),
             state = stateOf(1, overlayGranted),
             expanded = expanded == 1,
             requester = requesters[0],
             onHeaderClick = { tapped = 1 },
-            done = { DoneLine("Done! I can float over other apps.") },
+            done = { DoneLine(tr("Done! I can float over other apps.")) },
         ) {
             Text(
-                "Switch on “Display over other apps” so I can float my $MARK bubble and letter English on top of your browser.",
+                tr("Switch on “Display over other apps” so I can float my $MARK bubble and letter English on top of your browser."),
                 style = MaterialTheme.typography.bodyLarge,
                 color = pop.inkSoft,
             )
             Spacer(Modifier.height(12.dp))
-            StickerButton("Allow it ↗", onGrantOverlay)
+            StickerButton(tr("Allow it ↗"), onGrantOverlay)
             Spacer(Modifier.height(8.dp))
             Text(
-                "Find MangaLens in the list, flip the switch, then come back.",
+                tr("Find MangaLens in the list, flip the switch, then come back."),
                 style = MaterialTheme.typography.bodyMedium,
                 color = pop.inkSoft,
             )
@@ -206,14 +206,14 @@ internal fun SetupChecklist(
         val custom = settings.provider == LlmProvider.CUSTOM
         Ticket(
             number = 2,
-            title = "Give me a brain",
+            title = tr("Give me a brain"),
             state = stateOf(2, brainDone),
             expanded = expanded == 2,
             requester = requesters[1],
             onHeaderClick = { tapped = 2 },
-            headerTrailing = if (custom) null else ({ TextLink("Change", { tapped = 2 }) }),
+            headerTrailing = if (custom) null else ({ TextLink(tr("Change"), { tapped = 2 }) }),
             done = {
-                DoneLine(if (custom) "Done! Server saved." else "Done! $label key saved.")
+                DoneLine(if (custom) tr("Done! Server saved.") else tr("Done! %s key saved.", label))
                 SayHiResult(sayHi.phase, onRetry = { sayHi.runIfReady(drafts.settings) })
             },
         ) {
@@ -224,13 +224,13 @@ internal fun SetupChecklist(
             Spacer(Modifier.height(16.dp))
             Ticket(
                 number = 3,
-                title = "Make the English solid",
-                tag = "Optional",
+                title = tr("Make the English solid"),
+                tag = tr("Optional"),
                 state = stateOf(3, solidLettering),
                 expanded = expanded == 3,
                 requester = requesters[2],
                 onHeaderClick = { tapped = 3 },
-                done = { DoneLine("Done! My English is solid now.") },
+                done = { DoneLine(tr("Done! My English is solid now.")) },
             ) {
                 SolidStep(onTurnOnSolid, onOpenAppInfo)
             }
@@ -243,7 +243,7 @@ internal fun SetupChecklist(
         ) {
             Column(Modifier.bringIntoViewRequester(requesters[3])) {
                 Spacer(Modifier.height(20.dp))
-                StickerButton("All set, let's read!", onAllSet, height = 64.dp)
+                StickerButton(tr("All set, let's read!"), onAllSet, height = 64.dp)
             }
         }
     }
@@ -279,7 +279,7 @@ private fun Pips(steps: List<Boolean>, grow: Float) {
             Spacer(Modifier.width(6.dp))
         }
         Spacer(Modifier.width(4.dp))
-        Text("${steps.count { it }} of ${steps.size} done", style = MaterialTheme.typography.labelMedium, color = pop.inkSoft)
+        Text(tr("%d of %d done", steps.count { it }, steps.size), style = MaterialTheme.typography.labelMedium, color = pop.inkSoft)
     }
 }
 
@@ -342,11 +342,11 @@ private fun Ticket(
                             onHeaderClick()
                         }
                         .semantics(mergeDescendants = true) {
-                            contentDescription = "Step $number, $title" + (tag?.let { ", ${it.lowercase()}" } ?: "")
+                            contentDescription = tr("Step %d, %s", number, title) + (tag?.let { ", ${it.lowercase()}" } ?: "")
                             stateDescription = when (state) {
-                                TicketState.DONE -> "Done"
-                                TicketState.CURRENT -> "Next"
-                                TicketState.TODO -> "To do"
+                                TicketState.DONE -> tr("Done")
+                                TicketState.CURRENT -> tr("Next")
+                                TicketState.TODO -> tr("To do")
                             }
                             heading()
                         },
@@ -498,7 +498,7 @@ private fun ColumnScope.BrainStep(
     }
 
     // Which AI first, right here: each pick shows its own key link and Paste below.
-    Text("Pick an AI. Gemini is recommended: free and fastest.", style = MaterialTheme.typography.bodyLarge, color = pop.inkSoft)
+    Text(tr("Pick an AI. Gemini is recommended: free and fastest."), style = MaterialTheme.typography.bodyLarge, color = pop.inkSoft)
     Spacer(Modifier.height(12.dp))
     ProviderTiles(provider) {
         notice = null
@@ -509,26 +509,26 @@ private fun ColumnScope.BrainStep(
 
     if (provider == LlmProvider.CUSTOM) {
         Text(
-            "Add your server's URL. I'll talk to any OpenAI-compatible server.",
+            tr("Add your server's URL. I'll talk to any OpenAI-compatible server."),
             style = MaterialTheme.typography.bodyLarge,
             color = pop.inkSoft,
         )
         Spacer(Modifier.height(12.dp))
-        StickerButton("Set up my server ›", onOpenAiTweaks)
+        StickerButton(tr("Set up my server ›"), onOpenAiTweaks)
         return
     }
 
     val help = providerKeyHelp(provider)
     Text(
-        if (provider == LlmProvider.GEMINI) "I translate with Gemini AI. Its key is free, no card needed. Two taps:"
-        else "Paste your $label key and I'm ready.",
+        if (provider == LlmProvider.GEMINI) tr("I translate with Gemini AI. Its key is free, no card needed. Two taps:")
+        else tr("Paste your %s key and I'm ready.", label),
         style = MaterialTheme.typography.bodyLarge,
         color = pop.inkSoft,
     )
     Spacer(Modifier.height(12.dp))
     help.url?.let { url ->
         StickerButton(
-            if (provider == LlmProvider.GEMINI) "Get a free key ↗" else help.linkLabel,
+            if (provider == LlmProvider.GEMINI) tr("Get a free key ↗") else help.linkLabel,
             {
                 notice = null
                 askedForKey = true
@@ -538,7 +538,7 @@ private fun ColumnScope.BrainStep(
         if (provider == LlmProvider.GEMINI) {
             Spacer(Modifier.height(6.dp))
             Text(
-                "Sign in, tap “Create API key”, copy it, come back.",
+                tr("Sign in, tap “Create API key”, copy it, come back."),
                 style = MaterialTheme.typography.bodyMedium,
                 color = pop.inkSoft,
             )
@@ -546,7 +546,7 @@ private fun ColumnScope.BrainStep(
         Spacer(Modifier.height(12.dp))
     }
     StickerButton(
-        "Paste my key",
+        tr("Paste my key"),
         { submit(clipboard.getText()?.text.orEmpty()) },
         style = StickerStyle.Surface,
         wiggle = pasteWiggle,
@@ -558,14 +558,14 @@ private fun ColumnScope.BrainStep(
     if (geminiHint) {
         Spacer(Modifier.height(8.dp))
         Text(
-            "Gemini keys usually start with “AIza”. I'll try it anyway.",
+            tr("Gemini keys usually start with “AIza”. I'll try it anyway."),
             style = MaterialTheme.typography.bodyMedium,
             color = pop.inkSoft,
         )
     }
     SayHiResult(phase, onRetry = { sayHi.runIfReady(drafts.settings) })
     Spacer(Modifier.height(8.dp))
-    TextLink("Type it instead", {
+    TextLink(tr("Type it instead"), {
         notice = null
         typeOpen = !typeOpen
     })
@@ -585,7 +585,7 @@ private fun ColumnScope.BrainStep(
                 onDone = { submit(typed) },
             )
             Spacer(Modifier.height(12.dp))
-            StickerButton("Save key", { submit(typed) }, style = StickerStyle.Surface, height = 48.dp)
+            StickerButton(tr("Save key"), { submit(typed) }, style = StickerStyle.Surface, height = 48.dp)
             Spacer(Modifier.height(4.dp))
         }
     }
@@ -603,33 +603,32 @@ private fun ColumnScope.BrainStep(
 private fun ColumnScope.SolidStep(onTurnOnSolid: () -> Unit, onOpenAppInfo: () -> Unit) {
     val pop = LocalPop.current
     Text(
-        "Android lets a see-through overlay be at most 80% solid, so the original text shows faintly under my English. " +
-            "Turn MangaLens on in Accessibility and I letter at full strength.",
+        tr("Android lets a see-through overlay be at most 80% solid, so the original text shows faintly under my English. Turn MangaLens on in Accessibility and I letter at full strength."),
         style = MaterialTheme.typography.bodyLarge,
         color = pop.inkSoft,
     )
     Spacer(Modifier.height(6.dp))
     Text(
-        "This switch only lets me draw: it can't read your screen or tap anything.",
+        tr("This switch only lets me draw: it can't read your screen or tap anything."),
         style = MaterialTheme.typography.bodyMedium,
         color = pop.inkSoft,
     )
     Spacer(Modifier.height(12.dp))
-    StickerButton("Turn it on ↗", onTurnOnSolid)
+    StickerButton(tr("Turn it on ↗"), onTurnOnSolid)
     Spacer(Modifier.height(8.dp))
     Text(
-        "Find MangaLens in the list, switch it on and tap Allow, then come back.",
+        tr("Find MangaLens in the list, switch it on and tap Allow, then come back."),
         style = MaterialTheme.typography.bodyMedium,
         color = pop.inkSoft,
     )
     if (Build.VERSION.SDK_INT >= 33) {
         Spacer(Modifier.height(12.dp))
         Text(
-            "Switch greyed out as a “Restricted setting”? Open App info, tap ⋮ → Allow restricted settings, then try again.",
+            tr("Switch greyed out as a “Restricted setting”? Open App info, tap ⋮ → Allow restricted settings, then try again."),
             style = MaterialTheme.typography.bodyMedium,
             color = pop.inkSoft,
         )
         Spacer(Modifier.height(8.dp))
-        StickerButton("Open App info ↗", onOpenAppInfo, style = StickerStyle.Surface, height = 48.dp)
+        StickerButton(tr("Open App info ↗"), onOpenAppInfo, style = StickerStyle.Surface, height = 48.dp)
     }
 }

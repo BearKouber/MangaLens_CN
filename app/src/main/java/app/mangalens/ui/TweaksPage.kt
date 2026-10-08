@@ -1,5 +1,6 @@
 package app.mangalens.ui
 
+import app.mangalens.tr
 import android.os.Build
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
@@ -154,17 +155,17 @@ internal fun TweaksPage(
             Column(Modifier.widthIn(max = 560.dp).fillMaxWidth()) {
                 Row(Modifier.fillMaxWidth().heightIn(min = 64.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        "Tweaks",
+                        tr("Tweaks"),
                         style = MaterialTheme.typography.headlineSmall,
                         color = pop.ink,
                         modifier = Modifier.weight(1f).semantics { heading() },
                     )
                     IconButton(onClick = onClose, modifier = Modifier.size(48.dp)) {
-                        Icon(Icons.Filled.Close, contentDescription = "Close tweaks", tint = pop.ink)
+                        Icon(Icons.Filled.Close, contentDescription = tr("Close tweaks"), tint = pop.ink)
                     }
                 }
                 Text(
-                    "The defaults are good. Most people never need more than this.",
+                    tr("The defaults are good. Most people never need more than this."),
                     style = MaterialTheme.typography.bodyMedium,
                     color = pop.inkSoft,
                 )
@@ -190,7 +191,7 @@ internal fun TweaksPage(
                 Spacer(Modifier.height(32.dp))
                 Text(
                     listOf("MangaLens", versionName).filter { it.isNotEmpty() }.joinToString(" ") +
-                        " · Loving a raw? Support the official release when it exists.",
+                        tr(" · Loving a raw? Support the official release when it exists."),
                     style = MaterialTheme.typography.bodyMedium,
                     color = pop.inkSoft,
                     textAlign = TextAlign.Center,
@@ -235,15 +236,15 @@ private fun Helper(text: String, modifier: Modifier = Modifier) {
 @Composable
 private fun ReadingSection(settings: AppSettings, sink: SettingsSink, columns: Int) {
     val pop = LocalPop.current
-    SectionTitle("Reading")
-    Text("Language on the page", style = MaterialTheme.typography.titleMedium, color = pop.ink)
+    SectionTitle(tr("Reading"))
+    Text(tr("Language on the page"), style = MaterialTheme.typography.titleMedium, color = pop.ink)
     Spacer(Modifier.height(8.dp))
     PopTiles(
         listOf(
-            PopTile(SourceLang.AUTO, "Auto", glyph = "★"),
-            PopTile(SourceLang.KO, "Korean", glyph = "한"),
-            PopTile(SourceLang.JA, "Japanese", glyph = "日"),
-            PopTile(SourceLang.ZH, "Chinese", glyph = "中"),
+            PopTile(SourceLang.AUTO, tr("Auto"), glyph = "★"),
+            PopTile(SourceLang.KO, tr("Korean"), glyph = "한"),
+            PopTile(SourceLang.JA, tr("Japanese"), glyph = "日"),
+            PopTile(SourceLang.ZH, tr("Chinese"), glyph = "中"),
         ),
         selected = settings.sourceLang,
         onSelect = sink::setSourceLang,
@@ -252,18 +253,18 @@ private fun ReadingSection(settings: AppSettings, sink: SettingsSink, columns: I
     Spacer(Modifier.height(8.dp))
     Helper(
         when (settings.sourceLang) {
-            SourceLang.AUTO -> "I spot the language on every page."
-            SourceLang.KO -> "Reading Korean (manhwa)."
-            SourceLang.JA -> "Reading Japanese (manga)."
-            SourceLang.ZH -> "Reading Chinese (manhua)."
+            SourceLang.AUTO -> tr("I spot the language on every page.")
+            SourceLang.KO -> tr("Reading Korean (manhwa).")
+            SourceLang.JA -> tr("Reading Japanese (manga).")
+            SourceLang.ZH -> tr("Reading Chinese (manhua).")
         }
     )
     Spacer(Modifier.height(12.dp))
-    Text("Translate into", style = MaterialTheme.typography.titleMedium, color = pop.ink)
+    Text(tr("Translate into"), style = MaterialTheme.typography.titleMedium, color = pop.ink)
     Spacer(Modifier.height(8.dp))
     PopTiles(
         listOf(
-            PopTile(TargetLang.EN, "English", glyph = "A"),
+            PopTile(TargetLang.EN, tr("English"), glyph = "A"),
             PopTile(TargetLang.ZH_HANS, "简体中文", glyph = "简"),
             PopTile(TargetLang.ZH_HANT, "繁體中文", glyph = "繁"),
             PopTile(TargetLang.JA, "日本語", glyph = "あ"),
@@ -278,17 +279,17 @@ private fun ReadingSection(settings: AppSettings, sink: SettingsSink, columns: I
     Spacer(Modifier.height(12.dp))
     val handsFree = settings.mode == CaptureMode.AUTO
     PopToggleRow(
-        "Hands-free",
-        if (handsFree) "I translate each page as soon as you stop scrolling."
-        else "I wait until you tap the $MARK bubble. Saves data.",
+        tr("Hands-free"),
+        if (handsFree) tr("I translate each page as soon as you stop scrolling.")
+        else tr("I wait until you tap the $MARK bubble. Saves data."),
         handsFree,
         { sink.setMode(if (it) CaptureMode.AUTO else CaptureMode.MANUAL) },
     )
     Spacer(Modifier.height(12.dp))
     PopToggleRow(
-        "Dark gaps",
-        if (settings.darkGaps) "The white between a manhwa's panels is painted dark. The art and the lettering are left exactly as drawn. Dark and Black need Solid lettering; without it Android keeps every overlay a little see-through."
-        else "Paint the white between a manhwa's panels dark, for night reading. Also in the $MARK button's long-press menu.",
+        tr("Dark gaps"),
+        if (settings.darkGaps) tr("The white between a manhwa's panels is painted dark. The art and the lettering are left exactly as drawn. Dark and Black need Solid lettering; without it Android keeps every overlay a little see-through.")
+        else tr("Paint the white between a manhwa's panels dark, for night reading. Also in the $MARK button's long-press menu."),
         settings.darkGaps,
         sink::setDarkGaps,
     )
@@ -296,9 +297,9 @@ private fun ReadingSection(settings: AppSettings, sink: SettingsSink, columns: I
         Spacer(Modifier.height(8.dp))
         PopTiles(
             listOf(
-                PopTile(ShadeLevel.DIM, "Dim", glyph = "◐"),
-                PopTile(ShadeLevel.DARK, "Dark", glyph = "◑"),
-                PopTile(ShadeLevel.BLACK, "Black", glyph = "●"),
+                PopTile(ShadeLevel.DIM, tr("Dim"), glyph = "◐"),
+                PopTile(ShadeLevel.DARK, tr("Dark"), glyph = "◑"),
+                PopTile(ShadeLevel.BLACK, tr("Black"), glyph = "●"),
             ),
             selected = settings.gapShade,
             onSelect = sink::setGapShade,
@@ -325,13 +326,13 @@ private fun AutoScrollSection(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier) {
-        SectionTitle("Auto-scroll")
+        SectionTitle(tr("Auto-scroll"))
         val pop = LocalPop.current
         PopSurface(Modifier.fillMaxWidth(), RoundedCornerShape(20.dp), color = pop.surface) {
             val words: @Composable (Modifier) -> Unit = { m ->
                 Column(m) {
                     Text(
-                        if (on) "Auto-scroll · ready ✓" else "Auto-scroll · one switch to go",
+                        if (on) tr("Auto-scroll · ready ✓") else tr("Auto-scroll · one switch to go"),
                         style = MaterialTheme.typography.titleMedium,
                         color = pop.ink,
                     )
@@ -340,17 +341,17 @@ private fun AutoScrollSection(
                     // point to the long-press, as that row below does.
                     Helper(
                         when {
-                            !on -> "Only an Accessibility switch lets me move another app's page. Switch on \"MangaLens auto-scroll\"."
-                            settings.autoScrollButton -> "Tap ▼ beside the $MARK bubble and I scroll the page for you, in any app."
-                            else -> "Long-press the $MARK bubble → Auto-scroll the page, in any app."
+                            !on -> tr("Only an Accessibility switch lets me move another app's page. Switch on \"MangaLens auto-scroll\".")
+                            settings.autoScrollButton -> tr("Tap ▼ beside the $MARK bubble and I scroll the page for you, in any app.")
+                            else -> tr("Long-press the $MARK bubble → Auto-scroll the page, in any app.")
                         }
                     )
                 }
             }
             val button: @Composable (Modifier) -> Unit = { m ->
                 StickerButton(
-                    "Turn on ↗", onTurnOn, modifier = m, style = StickerStyle.Surface, height = 48.dp,
-                    fillWidth = stacked, contentDescription = "Turn on auto-scroll in Accessibility",
+                    tr("Turn on ↗"), onTurnOn, modifier = m, style = StickerStyle.Surface, height = 48.dp,
+                    fillWidth = stacked, contentDescription = tr("Turn on auto-scroll in Accessibility"),
                 )
             }
             when {
@@ -369,11 +370,11 @@ private fun AutoScrollSection(
         }
         if (!on && Build.VERSION.SDK_INT >= 33) {
             Spacer(Modifier.height(4.dp))
-            TextLink("Auto-scroll greyed out? Allow it in App info ↗", onOpenAppInfo)
+            TextLink(tr("Auto-scroll greyed out? Allow it in App info ↗"), onOpenAppInfo)
         }
         Spacer(Modifier.height(16.dp))
         PopSlider(
-            "Speed",
+            tr("Speed"),
             settings.scrollLevel.toFloat(),
             ScrollPace.MIN_LEVEL.toFloat()..ScrollPace.MAX_LEVEL.toFloat(),
             { "${it.roundToInt()}" },
@@ -383,24 +384,23 @@ private fun AutoScrollSection(
         )
         Spacer(Modifier.height(12.dp))
         PopToggleRow(
-            "Slow down for big balloons",
-            if (settings.smartScroll) "I watch the page and slow right down while a big balloon goes by, and hurry through empty gaps."
-            else "One steady speed, whatever is on the page.",
+            tr("Slow down for big balloons"),
+            if (settings.smartScroll) tr("I watch the page and slow right down while a big balloon goes by, and hurry through empty gaps.")
+            else tr("One steady speed, whatever is on the page."),
             settings.smartScroll,
             sink::setSmartScroll,
         )
         Spacer(Modifier.height(12.dp))
         PopToggleRow(
-            "Scroll button",
-            if (settings.autoScrollButton) "▼ sits beside the $MARK bubble. Touch the screen to pause the scroll."
-            else "Hidden. Long-press the $MARK bubble for Auto-scroll instead.",
+            tr("Scroll button"),
+            if (settings.autoScrollButton) tr("▼ sits beside the $MARK bubble. Touch the screen to pause the scroll.")
+            else tr("Hidden. Long-press the $MARK bubble for Auto-scroll instead."),
             settings.autoScrollButton,
             sink::setAutoScrollButton,
         )
         Spacer(Modifier.height(6.dp))
         Helper(
-            "Translation napping: the page glides without stopping. Translation awake: I stop at each page, " +
-                "translate it, and give you time to read before I move on."
+            tr("Translation napping: the page glides without stopping. Translation awake: I stop at each page, translate it, and give you time to read before I move on.")
         )
     }
 }
@@ -408,9 +408,9 @@ private fun AutoScrollSection(
 @Composable
 private fun TextSizeSection(settings: AppSettings, sink: SettingsSink) {
     val pop = LocalPop.current
-    SectionTitle("Look")
+    SectionTitle(tr("Look"))
     PopSlider(
-        "Text size",
+        tr("Text size"),
         settings.textScale,
         0.8f..1.5f,
         { "${(it * 100).toInt()}%" },
@@ -418,7 +418,7 @@ private fun TextSizeSection(settings: AppSettings, sink: SettingsSink) {
         below = { v ->
             SpeechBalloon(pop.surface, tail = Tail.Start, tailAt = 0.5f) {
                 Text(
-                    "Hey! Over here!",
+                    tr("Hey! Over here!"),
                     fontFamily = ComicNeue,
                     fontWeight = FontWeight.Bold,
                     fontSize = (16 * v).sp,
@@ -429,7 +429,7 @@ private fun TextSizeSection(settings: AppSettings, sink: SettingsSink) {
         },
     )
     Spacer(Modifier.height(6.dp))
-    Helper("How big I letter the English on the page.")
+    Helper(tr("How big I letter the English on the page."))
 }
 
 /**
@@ -441,9 +441,9 @@ private fun TextSizeSection(settings: AppSettings, sink: SettingsSink) {
 private fun NoGhostsRow(settings: AppSettings, sink: SettingsSink) {
     Spacer(Modifier.height(16.dp))
     PopToggleRow(
-        "No ghosts",
-        if (settings.noGhosts) "Nothing of the original shows under my English. The page is a little darker while I'm awake."
-        else "Full brightness, but the original shows faintly under my English.",
+        tr("No ghosts"),
+        if (settings.noGhosts) tr("Nothing of the original shows under my English. The page is a little darker while I'm awake.")
+        else tr("Full brightness, but the original shows faintly under my English."),
         settings.noGhosts,
         sink::setNoGhosts,
     )
@@ -464,21 +464,21 @@ private fun SolidLetteringRow(on: Boolean, onTurnOn: () -> Unit, onOpenAppInfo: 
         val words: @Composable (Modifier) -> Unit = { m ->
             Column(m) {
                 Text(
-                    if (on) "Solid lettering · on ✓" else "Solid lettering · off",
+                    if (on) tr("Solid lettering · on ✓") else tr("Solid lettering · off"),
                     style = MaterialTheme.typography.titleMedium,
                     color = pop.ink,
                 )
                 Spacer(Modifier.height(2.dp))
                 Helper(
-                    if (on) "Nothing of the original shows through my English."
-                    else "The original shows faintly under my English. Switch MangaLens on in Accessibility."
+                    if (on) tr("Nothing of the original shows through my English.")
+                    else tr("The original shows faintly under my English. Switch MangaLens on in Accessibility.")
                 )
             }
         }
         val button: @Composable (Modifier) -> Unit = { m ->
             StickerButton(
-                "Turn on ↗", onTurnOn, modifier = m, style = StickerStyle.Surface, height = 48.dp,
-                fillWidth = stacked, contentDescription = "Turn on solid lettering in Accessibility",
+                tr("Turn on ↗"), onTurnOn, modifier = m, style = StickerStyle.Surface, height = 48.dp,
+                fillWidth = stacked, contentDescription = tr("Turn on solid lettering in Accessibility"),
             )
         }
         when {
@@ -497,7 +497,7 @@ private fun SolidLetteringRow(on: Boolean, onTurnOn: () -> Unit, onOpenAppInfo: 
     }
     if (!on && Build.VERSION.SDK_INT >= 33) {
         Spacer(Modifier.height(4.dp))
-        TextLink("Greyed out? Allow it in App info ↗", onOpenAppInfo)
+        TextLink(tr("Greyed out? Allow it in App info ↗"), onOpenAppInfo)
     }
 }
 
@@ -511,9 +511,9 @@ internal fun aiBrainSummary(s: AppSettings, refused: Boolean = false): Pair<Stri
     val label = LlmHttp.providerLabel(s)
     val custom = s.provider == LlmProvider.CUSTOM
     return when {
-        LlmHttp.setupNeeded(s) != null -> (if (custom) "$label · no server URL yet" else "$label · no key yet") to false
-        refused -> (if (custom) "$label · token refused" else "$label · key refused") to false
-        else -> (if (custom) "$label · server set ✓" else "$label · key saved ✓") to true
+        LlmHttp.setupNeeded(s) != null -> (if (custom) tr("%s · no server URL yet", label) else tr("%s · no key yet", label)) to false
+        refused -> (if (custom) tr("%s · token refused", label) else tr("%s · key refused", label)) to false
+        else -> (if (custom) tr("%s · server set ✓", label) else tr("%s · key saved ✓", label)) to true
     }
 }
 
@@ -551,7 +551,7 @@ private fun YourAiSection(drafts: AiDrafts, sayHi: SayHi, modifier: Modifier) {
         }
     }
 
-    SectionTitle("Your AI")
+    SectionTitle(tr("Your AI"))
     PopSurface(modifier.fillMaxWidth(), RoundedCornerShape(20.dp), color = pop.surface) {
         Column(Modifier.fillMaxWidth().padding(16.dp)) {
             Text(
@@ -564,7 +564,7 @@ private fun YourAiSection(drafts: AiDrafts, sayHi: SayHi, modifier: Modifier) {
                 SecretField(
                     value = drafts.customUrl,
                     onValueChange = drafts::editCustomUrl,
-                    label = "Server URL (chat completions)",
+                    label = tr("Server URL (chat completions)"),
                     secret = false,
                     keyboardType = KeyboardType.Uri,
                     isError = drafts.customUrl.isBlank(),
@@ -576,15 +576,15 @@ private fun YourAiSection(drafts: AiDrafts, sayHi: SayHi, modifier: Modifier) {
                 val testing = phase == SayHi.Phase.Running
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     StickerButton(
-                        if (testing) "Testing…" else "Test it",
+                        if (testing) tr("Testing…") else tr("Test it"),
                         { if (!testing && !sayHi.runIfReady(s)) view.buzz(Buzz.REJECT) },
                         modifier = Modifier.weight(1f),
                         style = StickerStyle.Surface,
                         height = 48.dp,
-                        contentDescription = if (provider == LlmProvider.CUSTOM) "Test the server on a line" else "Test the key on a line",
+                        contentDescription = if (provider == LlmProvider.CUSTOM) tr("Test the server on a line") else tr("Test the key on a line"),
                     )
                     StickerButton(
-                        if (provider == LlmProvider.CUSTOM) "Change token" else "Change key",
+                        if (provider == LlmProvider.CUSTOM) tr("Change token") else tr("Change key"),
                         { changing = true },
                         modifier = Modifier.weight(1f),
                         style = StickerStyle.Surface,
@@ -607,7 +607,7 @@ private fun YourAiSection(drafts: AiDrafts, sayHi: SayHi, modifier: Modifier) {
                     )
                     Spacer(Modifier.width(10.dp))
                     StickerButton(
-                        "Paste",
+                        tr("Paste"),
                         {
                             notice = null
                             val check = drafts.submitKey(clipboard.getText()?.text.orEmpty(), sayHi)
@@ -622,7 +622,7 @@ private fun YourAiSection(drafts: AiDrafts, sayHi: SayHi, modifier: Modifier) {
                         height = 48.dp,
                         fillWidth = false,
                         wiggle = pasteWiggle,
-                        contentDescription = "Paste key from clipboard",
+                        contentDescription = tr("Paste key from clipboard"),
                     )
                 }
                 notice?.let {
@@ -663,7 +663,7 @@ private fun MoreOptions(
                 Modifier
                     .clickable(interaction, indication = null, role = Role.Button, onClick = onToggle)
                     .semantics(mergeDescendants = true) {
-                        stateDescription = if (open) "Expanded" else "Collapsed"
+                        stateDescription = if (open) tr("Expanded") else tr("Collapsed")
                     }
                     .heightIn(min = 64.dp)
                     .padding(horizontal = 16.dp, vertical = 12.dp),
@@ -671,13 +671,13 @@ private fun MoreOptions(
             ) {
                 Column(Modifier.weight(1f)) {
                     Text(
-                        "More options",
+                        tr("More options"),
                         style = MaterialTheme.typography.titleLarge,
                         color = pop.ink,
                         modifier = Modifier.semantics { heading() },
                     )
                     Text(
-                        "Timing, data, model, other AIs. Leave these alone if things work.",
+                        tr("Timing, data, model, other AIs. Leave these alone if things work."),
                         style = MaterialTheme.typography.bodyMedium,
                         color = pop.inkSoft,
                     )
@@ -707,42 +707,42 @@ private fun MoreOptionsBody(settings: AppSettings, sink: SettingsSink, drafts: A
     val pop = LocalPop.current
     val provider = settings.provider
 
-    GroupTitle("Timing and data")
+    GroupTitle(tr("Timing and data"))
     PopSlider(
-        "Reaction time",
+        tr("Reaction time"),
         settings.stabilityMs.toFloat(),
         200f..900f,
         { "${it.toInt()} ms" },
         { sink.setStabilityMs(it.toInt()) },
-        startLabel = "Snappy",
-        endLabel = "Patient",
+        startLabel = tr("Snappy"),
+        endLabel = tr("Patient"),
     )
-    Helper("How long a page sits still before I read it.")
+    Helper(tr("How long a page sits still before I read it."))
     Spacer(Modifier.height(16.dp))
     PopSlider(
-        "Skip the top of the screen",
+        tr("Skip the top of the screen"),
         settings.ignoreTopPct,
         0f..0.15f,
         { "${(it * 100).toInt()}%" },
         sink::setIgnoreTopPct,
     )
-    Helper("Keeps me off your browser's address bar.")
+    Helper(tr("Keeps me off your browser's address bar."))
     Spacer(Modifier.height(16.dp))
     PopToggleRow(
-        "Data saver",
-        "Smaller page uploads. Tiny text may read a little less sharply.",
+        tr("Data saver"),
+        tr("Smaller page uploads. Tiny text may read a little less sharply."),
         settings.dataSaver,
         sink::setDataSaver,
     )
 
-    GroupTitle("How the AI works")
-    Text("Thinking time", style = MaterialTheme.typography.bodyLarge, color = pop.ink)
+    GroupTitle(tr("How the AI works"))
+    Text(tr("Thinking time"), style = MaterialTheme.typography.bodyLarge, color = pop.ink)
     Spacer(Modifier.height(8.dp))
     PopTiles(
         listOf(
-            PopTile(AiReasoning.FAST, "Fast"),
-            PopTile(AiReasoning.BALANCED, "Balanced"),
-            PopTile(AiReasoning.THOROUGH, "Thorough"),
+            PopTile(AiReasoning.FAST, tr("Fast")),
+            PopTile(AiReasoning.BALANCED, tr("Balanced")),
+            PopTile(AiReasoning.THOROUGH, tr("Thorough")),
         ),
         selected = settings.aiReasoning,
         onSelect = sink::setAiReasoning,
@@ -752,9 +752,9 @@ private fun MoreOptionsBody(settings: AppSettings, sink: SettingsSink, drafts: A
     Spacer(Modifier.height(8.dp))
     Helper(
         when (settings.aiReasoning) {
-            AiReasoning.FAST -> "Quickest first line. Recommended for comics."
-            AiReasoning.BALANCED -> "A little more care on hard pages, a little slower."
-            AiReasoning.THOROUGH -> "Most careful with who's speaking and wild lettering, but slower."
+            AiReasoning.FAST -> tr("Quickest first line. Recommended for comics.")
+            AiReasoning.BALANCED -> tr("A little more care on hard pages, a little slower.")
+            AiReasoning.THOROUGH -> tr("Most careful with who's speaking and wild lettering, but slower.")
         }
     )
     Spacer(Modifier.height(16.dp))
@@ -762,8 +762,8 @@ private fun MoreOptionsBody(settings: AppSettings, sink: SettingsSink, drafts: A
     if (provider == LlmProvider.GEMINI) {
         Spacer(Modifier.height(16.dp))
         PopToggleRow(
-            "AI art redraw",
-            "Asks an image model to repaint busy art under text. Often refused on explicit pages; off is fine.",
+            tr("AI art redraw"),
+            tr("Asks an image model to repaint busy art under text. Often refused on explicit pages; off is fine."),
             settings.aiCleanup,
             sink::setAiCleanup,
         )
@@ -771,27 +771,27 @@ private fun MoreOptionsBody(settings: AppSettings, sink: SettingsSink, drafts: A
         Spacer(Modifier.height(16.dp))
         val sees = settings.aiVision != AiVisionMode.OFF
         PopToggleRow(
-            "Let the AI see the page",
-            if (sees) "Sends the page image, so handwriting and wild lettering are read too."
-            else "Sends only the text your phone reads. Uses less data; fancy lettering may be missed.",
+            tr("Let the AI see the page"),
+            if (sees) tr("Sends the page image, so handwriting and wild lettering are read too.")
+            else tr("Sends only the text your phone reads. Uses less data; fancy lettering may be missed."),
             sees,
             { sink.setAiVision(if (it) AiVisionMode.AUTO else AiVisionMode.OFF) },
         )
     }
 
     Column(otherAi) {
-        GroupTitle("Use a different AI")
-        Helper("Gemini is the fastest here and its key is free. Pick another only if you already pay for it.")
+        GroupTitle(tr("Use a different AI"))
+        Helper(tr("Gemini is the fastest here and its key is free. Pick another only if you already pay for it."))
     }
     Spacer(Modifier.height(8.dp))
     ProviderTiles(provider, sink::setProvider)
     Spacer(Modifier.height(8.dp))
-    Helper("The key and, for Custom, the server URL go in Your AI above.")
+    Helper(tr("The key and, for Custom, the server URL go in Your AI above."))
 
-    GroupTitle("Troubleshooting")
+    GroupTitle(tr("Troubleshooting"))
     PopToggleRow(
-        "Diagnostics",
-        "Outlines what I find on the page and shows a status line, to see why a balloon was missed.",
+        tr("Diagnostics"),
+        tr("Outlines what I find on the page and shows a status line, to see why a balloon was missed."),
         settings.diagnostics,
         sink::setDiagnostics,
     )
@@ -802,12 +802,12 @@ private fun MoreOptionsBody(settings: AppSettings, sink: SettingsSink, drafts: A
 internal fun ProviderTiles(selected: LlmProvider, onSelect: (LlmProvider) -> Unit) {
     PopTiles(
         listOf(
-            PopTile(LlmProvider.GEMINI, "Gemini", caption = "Free · fastest"),
-            PopTile(LlmProvider.ANTHROPIC, "Claude", caption = "by Anthropic"),
-            PopTile(LlmProvider.OPENAI, "OpenAI", caption = "Paid key"),
-            PopTile(LlmProvider.OPENROUTER, "OpenRouter", caption = "Many models"),
-            PopTile(LlmProvider.DEEPSEEK, "DeepSeek", caption = "The big fish"),
-            PopTile(LlmProvider.CUSTOM, "Custom", caption = "Your own server"),
+            PopTile(LlmProvider.GEMINI, "Gemini", caption = tr("Free · fastest")),
+            PopTile(LlmProvider.ANTHROPIC, "Claude", caption = tr("by Anthropic")),
+            PopTile(LlmProvider.OPENAI, "OpenAI", caption = tr("Paid key")),
+            PopTile(LlmProvider.OPENROUTER, "OpenRouter", caption = tr("Many models")),
+            PopTile(LlmProvider.DEEPSEEK, "DeepSeek", caption = tr("The big fish")),
+            PopTile(LlmProvider.CUSTOM, tr("Custom"), caption = tr("Your own server")),
         ),
         selected = selected,
         onSelect = onSelect,
@@ -826,23 +826,23 @@ internal fun ProviderTiles(selected: LlmProvider, onSelect: (LlmProvider) -> Uni
 private fun ModelChoice(drafts: AiDrafts) {
     val pop = LocalPop.current
     val s = drafts.settings
-    Text("Model", style = MaterialTheme.typography.bodyLarge, color = pop.ink)
+    Text(tr("Model"), style = MaterialTheme.typography.bodyLarge, color = pop.ink)
     Spacer(Modifier.height(6.dp))
     val pinned = drafts.model.isNotBlank()
-    val auto = if (s.provider == LlmProvider.GEMINI) "Automatic: the newest Gemini Flash. Best for almost everyone."
-    else "Blank = " + s.copy(model = "").effectiveModel().ifEmpty { "your server's default" }
+    val auto = if (s.provider == LlmProvider.GEMINI) tr("Automatic: the newest Gemini Flash. Best for almost everyone.")
+    else tr("Blank = %s", s.copy(model = "").effectiveModel().ifEmpty { tr("your server's default") })
     Helper(if (pinned) drafts.model else auto)
     Spacer(Modifier.height(8.dp))
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.Bottom) {
         ModelPicker(s, onPick = drafts::editModel, modifier = Modifier.weight(1f))
         if (pinned) {
             StickerButton(
-                "Automatic",
+                tr("Automatic"),
                 { drafts.editModel("") },
                 modifier = Modifier.weight(1f),
                 style = StickerStyle.Surface,
                 height = 48.dp,
-                contentDescription = "Use the automatic model",
+                contentDescription = tr("Use the automatic model"),
             )
         }
     }
@@ -851,10 +851,10 @@ private fun ModelChoice(drafts: AiDrafts) {
         SecretField(
             value = drafts.model,
             onValueChange = drafts::editModel,
-            label = "Model",
+            label = tr("Model"),
             secret = false,
             showLabel = false,
-            placeholder = "Or type a model name",
+            placeholder = tr("Or type a model name"),
         )
     }
 }
@@ -887,12 +887,12 @@ private fun ModelPicker(settings: AppSettings, onPick: (String) -> Unit, modifie
         loading = true
         try {
             models = ModelCatalog.list(settings)
-            error = if (models.isEmpty()) "No usable models came back." else null
+            error = if (models.isEmpty()) tr("No usable models came back.") else null
             open = waiting && models.isNotEmpty()
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            error = "Couldn't fetch models: " + (e.message ?: "network error")
+            error = tr("Couldn't fetch models: %s", e.message ?: tr("network error"))
         } finally {
             loading = false
             waiting = false
@@ -914,10 +914,10 @@ private fun ModelPicker(settings: AppSettings, onPick: (String) -> Unit, modifie
         }
         Box(Modifier.fillMaxWidth().onSizeChanged { width = with(density) { it.width.toDp() } }) {
             StickerButton(
-                if (waiting) "Asking ${LlmHttp.providerLabel(settings)}…" else "Choose a model ▾",
+                if (waiting) tr("Asking %s…", LlmHttp.providerLabel(settings)) else tr("Choose a model ▾"),
                 {
                     if (!canAsk) {
-                        error = "Add your key first. The list comes from your account."
+                        error = tr("Add your key first. The list comes from your account.")
                         return@StickerButton
                     }
                     if (models.isNotEmpty()) {

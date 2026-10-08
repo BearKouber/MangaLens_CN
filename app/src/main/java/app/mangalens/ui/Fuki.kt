@@ -1,5 +1,6 @@
 package app.mangalens.ui
 
+import app.mangalens.tr
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -364,7 +365,7 @@ internal fun FukiStage(
                     interactionSource = interaction,
                     indication = null,
                     role = Role.Button,
-                    onClickLabel = if (stage == Stage.SETUP) "Show the next step" else null,
+                    onClickLabel = if (stage == Stage.SETUP) tr("Show the next step") else null,
                 ) {
                     when {
                         stage == Stage.SETUP && setupDone < 2 -> {
@@ -382,20 +383,20 @@ internal fun FukiStage(
                 .semantics(mergeDescendants = true) {
                     when (stage) {
                         Stage.READY -> {
-                            contentDescription = "Start translating"
-                            stateDescription = "Off"
+                            contentDescription = tr("Start translating")
+                            stateDescription = tr("Off")
                         }
                         Stage.RUNNING -> {
-                            contentDescription = "Stop translating"
-                            stateDescription = "On"
+                            contentDescription = tr("Stop translating")
+                            stateDescription = tr("On")
                         }
                         Stage.PAUSED -> {
-                            contentDescription = "Wake up"
-                            stateDescription = "Paused"
+                            contentDescription = tr("Wake up")
+                            stateDescription = tr("Paused")
                         }
                         Stage.SETUP, Stage.LOADING ->
-                            contentDescription = if (setupDone >= 2) "Fuki is awake. Tap “All set, let's read!” below."
-                            else "Fuki is asleep. Finish the steps below to start."
+                            contentDescription = if (setupDone >= 2) tr("Fuki is awake. Tap “All set, let's read!” below.")
+                            else tr("Fuki is asleep. Finish the steps below to start.")
                     }
                 }
         ) {

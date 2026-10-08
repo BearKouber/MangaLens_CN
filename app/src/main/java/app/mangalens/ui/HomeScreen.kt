@@ -1,5 +1,6 @@
 package app.mangalens.ui
 
+import app.mangalens.tr
 import android.content.Context
 import android.os.Build
 import android.view.ViewGroup
@@ -404,7 +405,7 @@ private fun HomePage(
     val reduced = LocalReducedMotion.current
     val uri = LocalUriHandler.current
     var dialog by remember { mutableStateOf(false) }
-    val browser = state.browserName ?: "your browser"
+    val browser = state.browserName ?: tr("your browser")
     val summary = tweaksSummary(settings)
 
     val tips = tipsFor(settings.mode)
@@ -562,9 +563,9 @@ private fun PlayHeadline(stage: Stage, startRefused: Boolean) {
     val pop = LocalPop.current
     val reduced = LocalReducedMotion.current
     val text = when (stage) {
-        Stage.RUNNING -> "Reading along!"
-        Stage.PAUSED -> "Taking a nap."
-        else -> if (startRefused) "I can't read what I can't see!" else "Ready when you are!"
+        Stage.RUNNING -> tr("Reading along!")
+        Stage.PAUSED -> tr("Taking a nap.")
+        else -> if (startRefused) tr("I can't read what I can't see!") else tr("Ready when you are!")
     }
     BoxWithConstraints(Modifier.fillMaxWidth()) {
         val small = maxWidth < 360.dp
@@ -646,12 +647,12 @@ private fun PlayBody(
         Column(Modifier.fillMaxWidth()) {
             val caption = when (s) {
                 Stage.RUNNING ->
-                    if (handsFree) "Scroll in $browser. When you stop, I translate. Tap the $MARK bubble to pause; hold it for more."
-                    else "Open a page in $browser, then tap the $MARK bubble to translate it. Hold it for more."
-                Stage.PAUSED -> "I'm napping. Tap me to wake up, or tap the $MARK bubble in $browser."
+                    if (handsFree) tr("Scroll in %s. When you stop, I translate. Tap the $MARK bubble to pause; hold it for more.", browser)
+                    else tr("Open a page in %s, then tap the $MARK bubble to translate it. Hold it for more.", browser)
+                Stage.PAUSED -> tr("I'm napping. Tap me to wake up, or tap the $MARK bubble in %s.", browser)
                 else ->
-                    if (state.startRefused) "⚠ Tap GO again and allow screen sharing. If Android offers a choice, pick “Entire screen”."
-                    else "Tap GO and allow screen sharing, then hop into $browser. When you stop scrolling, I letter the English right over the bubbles."
+                    if (state.startRefused) tr("⚠ Tap GO again and allow screen sharing. If Android offers a choice, pick “Entire screen”.")
+                    else tr("Tap GO and allow screen sharing, then hop into %s. When you stop scrolling, I letter the English right over the bubbles.", browser)
             }
             val refused = s == Stage.READY && state.startRefused
             Text(
@@ -661,13 +662,13 @@ private fun PlayBody(
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth(),
             )
-            val openLabel = if (state.browserName != null) "Open ${state.browserName} ↗" else "Open my browser ↗"
+            val openLabel = if (state.browserName != null) tr("Open %s ↗", state.browserName) else tr("Open my browser ↗")
             when (s) {
                 Stage.RUNNING -> {
                     if (!aiReady) {
                         Spacer(Modifier.height(16.dp))
                         StickerButton(
-                            "⚠ No AI key, so I can't translate. Add one →",
+                            tr("⚠ No AI key, so I can't translate. Add one →"),
                             { openTweaks(TweaksTarget.AI) },
                             style = StickerStyle.Warn,
                         )
@@ -680,7 +681,7 @@ private fun PlayBody(
                     Spacer(Modifier.height(16.dp))
                     StickerButton(openLabel, actions.onOpenBrowser, style = StickerStyle.Surface)
                     Spacer(Modifier.height(12.dp))
-                    StickerButton("Stop translating", actions.onStop, style = StickerStyle.Surface)
+                    StickerButton(tr("Stop translating"), actions.onStop, style = StickerStyle.Surface)
                 }
                 else -> Unit
             }
@@ -705,7 +706,7 @@ private fun TipBalloon(tips: List<String>, index: Int, onNext: () -> Unit, look:
     Row(
         Modifier
             .fillMaxWidth()
-            .clickable(interaction, indication = null, role = Role.Button, onClickLabel = "Next tip") {
+            .clickable(interaction, indication = null, role = Role.Button, onClickLabel = tr("Next tip")) {
                 view.buzz(Buzz.TICK)
                 onNext()
             }
@@ -751,7 +752,7 @@ internal fun TweaksSticker(summary: String, onClick: () -> Unit) {
         Row(
             Modifier
                 .clickable(interaction, indication = null, role = Role.Button, onClick = onClick)
-                .clearAndSetSemantics { contentDescription = "Tweaks: $summary" }
+                .clearAndSetSemantics { contentDescription = tr("Tweaks: %s", summary) }
                 .heightIn(min = 64.dp)
                 .padding(horizontal = 16.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -759,7 +760,7 @@ internal fun TweaksSticker(summary: String, onClick: () -> Unit) {
             Icon(Icons.Filled.Settings, contentDescription = null, tint = pop.ink, modifier = Modifier.size(24.dp))
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
-                Text("Tweaks", style = MaterialTheme.typography.titleMedium, color = pop.ink)
+                Text(tr("Tweaks"), style = MaterialTheme.typography.titleMedium, color = pop.ink)
                 Text(summary, style = MaterialTheme.typography.bodyMedium, color = pop.inkSoft)
             }
             Spacer(Modifier.width(8.dp))
@@ -776,7 +777,7 @@ internal fun UpdateDialogCard(update: UpdateChecker.Update, onDownload: () -> Un
         PopSurface(Modifier.fillMaxWidth(), RoundedCornerShape(20.dp), color = pop.surface) {
             Column(Modifier.padding(start = 24.dp, end = 24.dp, top = 24.dp, bottom = 8.dp)) {
                 Text(
-                    "MangaLens ${update.version} is out!",
+                    tr("MangaLens %s is out!", update.version),
                     style = MaterialTheme.typography.titleLarge.copy(lineBreak = LineBreak.Heading),
                     color = pop.ink,
                     modifier = Modifier.padding(end = 40.dp).semantics { heading() },
@@ -785,17 +786,17 @@ internal fun UpdateDialogCard(update: UpdateChecker.Update, onDownload: () -> Un
                 Text(
                     when {
                         update.requiresReinstall ->
-                            "This install can't update in place. Write down your API key, download the APK, uninstall MangaLens, then install the new one. Your API key will be cleared."
+                            tr("This install can't update in place. Write down your API key, download the APK, uninstall MangaLens, then install the new one. Your API key will be cleared.")
                         update.legacyBridge ->
-                            "This one-time bridge APK keeps your data while moving 0.9.1 to the private release key."
-                        else -> "A fresh version is ready. Tap Download; Android asks before installing anything."
+                            tr("This one-time bridge APK keeps your data while moving 0.9.1 to the private release key.")
+                        else -> tr("A fresh version is ready. Tap Download; Android asks before installing anything.")
                     },
                     style = MaterialTheme.typography.bodyLarge,
                     color = pop.ink,
                 )
                 Spacer(Modifier.height(20.dp))
-                StickerButton("Download", onDownload)
-                TextLink("Later", onLater, Modifier.align(Alignment.CenterHorizontally))
+                StickerButton(tr("Download"), onDownload)
+                TextLink(tr("Later"), onLater, Modifier.align(Alignment.CenterHorizontally))
             }
         }
         NewBurst(Modifier.align(Alignment.TopEnd).offset(x = 12.dp, y = (-26).dp))
@@ -871,7 +872,7 @@ private fun UpdateDialog(update: UpdateChecker.Update, onDownload: () -> Unit, o
             Modifier
                 .fillMaxSize()
                 .background(scrim)
-                .clickable(remember { MutableInteractionSource() }, indication = null, onClickLabel = "Close", onClick = onDismiss)
+                .clickable(remember { MutableInteractionSource() }, indication = null, onClickLabel = tr("Close"), onClick = onDismiss)
                 .safeDrawingPadding()
                 .padding(horizontal = 24.dp),
             contentAlignment = Alignment.Center,

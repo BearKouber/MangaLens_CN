@@ -1,5 +1,6 @@
 package app.mangalens.overlay
 
+import app.mangalens.tr
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
@@ -92,9 +93,9 @@ class FloatingButtonView(context: Context) : View(context) {
 
     private fun updateDescription() {
         contentDescription = when {
-            paused -> "Translation paused: tap to resume"
-            manual -> "Tap to translate this page"
-            else -> "Translation on: tap to pause"
+            paused -> tr("Translation paused: tap to resume")
+            manual -> tr("Tap to translate this page")
+            else -> tr("Translation on: tap to pause")
         }
     }
 

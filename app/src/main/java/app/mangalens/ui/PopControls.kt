@@ -1,5 +1,6 @@
 package app.mangalens.ui
 
+import app.mangalens.tr
 import android.os.Build
 import android.view.HapticFeedbackConstants
 import android.view.View
@@ -820,12 +821,12 @@ internal fun SecretField(
                                 Modifier
                                     .minimumInteractiveComponentSize()
                                     .clickable(role = Role.Button) { shown = !shown }
-                                    .semantics { contentDescription = if (shown) "Hide key" else "Show key" }
+                                    .semantics { contentDescription = if (shown) tr("Hide key") else tr("Show key") }
                                     .padding(horizontal = 12.dp),
                                 contentAlignment = Alignment.Center,
                             ) {
                                 Text(
-                                    if (shown) "Hide" else "Show",
+                                    if (shown) tr("Hide") else tr("Show"),
                                     style = MaterialTheme.typography.titleMedium,
                                     color = pop.ink,
                                     modifier = Modifier.clearAndSetSemantics { },
@@ -1046,7 +1047,7 @@ internal fun UpdateSticker(update: UpdateChecker.Update, onClick: () -> Unit, mo
             .wiggle(wiggle)
             .rotate(-3f)
             .semantics(mergeDescendants = true) {
-                contentDescription = "Update available: MangaLens ${update.version}"
+                contentDescription = tr("Update available: MangaLens %s", update.version)
                 role = Role.Button
             }
             .clickable(interaction, indication = null, role = Role.Button) {

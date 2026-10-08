@@ -1,5 +1,6 @@
 package app.mangalens.translate
 
+import app.mangalens.tr
 import app.mangalens.settings.AiReasoning
 import app.mangalens.settings.AppSettings
 import app.mangalens.settings.LlmProvider
@@ -199,8 +200,8 @@ internal object LlmHttp {
      */
     fun setupNeeded(settings: AppSettings): String? = when {
         settings.provider == LlmProvider.CUSTOM ->
-            if (settings.customUrl.isBlank()) "Add your AI endpoint in MangaLens" else null
-        cleanKey(settings.apiKey).isEmpty() -> "Add your " + providerLabel(settings) + " key in MangaLens"
+            if (settings.customUrl.isBlank()) tr("Add your AI endpoint in MangaLens") else null
+        cleanKey(settings.apiKey).isEmpty() -> tr("Add your %s key in MangaLens", providerLabel(settings))
         else -> null
     }
 

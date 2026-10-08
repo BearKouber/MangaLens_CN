@@ -64,6 +64,12 @@ android {
             // android.graphics.Rect, so the tests need real framework classes
             // rather than the stub jar's "not mocked" methods.
             isIncludeAndroidResources = true
+            // The copy tests read the English; tr() would hand a Chinese
+            // machine's JVM the Chinese instead.
+            all {
+                it.systemProperty("user.language", "en")
+                it.systemProperty("user.country", "US")
+            }
         }
     }
 }

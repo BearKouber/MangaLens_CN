@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lettering_host_summary">让 MangaLens 的译文完全不透明</string>
+    <string name="lettering_host_description">让 MangaLens 的译文完全不透明地盖在页面上。不开的话，Android 会让文字保持一点透明，下面会隐约看到原文。这个服务只负责绘制：它读不了你的屏幕，看不到你输入的内容，也不能替你操作。</string>
+    <string name="auto_scroll_label">MangaLens 自动滚动</string>
+    <string name="auto_scroll_summary">开启自动滚动后帮你滚动页面</string>
+    <string name="auto_scroll_description">让 MangaLens 在任何 App 里帮你滚动页面。只在你开着自动滚动时拖动页面，你一碰屏幕就停。这个开关做不了别的事：它读不了屏幕内容，看不到你输入的内容，也点不了任何东西。（遇到大气泡放慢，用的是你已经允许 MangaLens 的屏幕捕获。）</string>
+</resources>

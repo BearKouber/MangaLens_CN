@@ -1,5 +1,6 @@
 package app.mangalens.ui
 
+import app.mangalens.tr
 import app.mangalens.settings.AppSettings
 import app.mangalens.settings.CaptureMode
 import app.mangalens.settings.LlmProvider
@@ -69,16 +70,16 @@ internal fun looksLikeGeminiKey(k: String): Boolean =
  * reader can do about it, in [provider]'s name.
  */
 internal fun friendlyTestFailure(cause: String, provider: String): String = when {
-    cause == "key rejected" -> "$provider said no to that key. Copy the whole key again, then tap Paste."
-    cause == "network" -> "I can't reach the internet. Check your connection and try again."
+    cause == "key rejected" -> tr("%s said no to that key. Copy the whole key again, then tap Paste.", provider)
+    cause == "network" -> tr("I can't reach the internet. Check your connection and try again.")
     cause == "rate limited" ->
-        "$provider says slow down: it's busy, or today's free quota is used up. Try again in a minute."
+        tr("%s says slow down: it's busy, or today's free quota is used up. Try again in a minute.", provider)
     cause == "model unavailable" || cause == "HTTP 404" ->
-        "That model isn't on your key. In Tweaks → More options, set the model back to Automatic."
-    cause == "declined" -> "$provider declined my test line. Odd! Try again."
-    cause.startsWith("HTTP 5") -> "$provider is having a moment. Try again shortly."
-    cause == "timeout" -> "$provider took too long to answer. Try again?"
-    else -> "Something went wrong ($cause). Try again?"
+        tr("That model isn't on your key. In Tweaks → More options, set the model back to Automatic.")
+    cause == "declined" -> tr("%s declined my test line. Odd! Try again.", provider)
+    cause.startsWith("HTTP 5") -> tr("%s is having a moment. Try again shortly.", provider)
+    cause == "timeout" -> tr("%s took too long to answer. Try again?", provider)
+    else -> tr("Something went wrong (%s). Try again?", tr(cause))
 }
 
 /**
@@ -89,29 +90,29 @@ internal fun friendlyTestFailure(cause: String, provider: String): String = when
  */
 internal fun sayHiBlocker(s: AppSettings): String? = when {
     LlmHttp.setupNeeded(s) == null -> null
-    s.provider == LlmProvider.CUSTOM -> "Add your server's URL above first, then test."
-    else -> "Paste your ${LlmHttp.providerLabel(s)} key above first, then test."
+    s.provider == LlmProvider.CUSTOM -> tr("Add your server's URL above first, then test.")
+    else -> tr("Paste your %s key above first, then test.", LlmHttp.providerLabel(s))
 }
 
 /** The one-line summary on the home screen's Tweaks sticker. */
 internal fun tweaksSummary(s: AppSettings): String {
     val lang = when (s.sourceLang) {
-        SourceLang.AUTO -> "Auto language"
-        SourceLang.KO -> "Korean"
-        SourceLang.JA -> "Japanese"
-        SourceLang.ZH -> "Chinese"
+        SourceLang.AUTO -> tr("Auto language")
+        SourceLang.KO -> tr("Korean")
+        SourceLang.JA -> tr("Japanese")
+        SourceLang.ZH -> tr("Chinese")
     }
-    val mode = if (s.mode == CaptureMode.AUTO) "Hands-free" else "Tap to translate"
+    val mode = if (s.mode == CaptureMode.AUTO) tr("Hands-free") else tr("Tap to translate")
     return lang + " · " + mode + " · " + LlmHttp.providerLabel(s)
 }
 
 internal fun apiKeyLabel(provider: LlmProvider): String = when (provider) {
-    LlmProvider.ANTHROPIC -> "Anthropic API key"
-    LlmProvider.OPENAI -> "OpenAI API key"
-    LlmProvider.GEMINI -> "Gemini API key"
-    LlmProvider.OPENROUTER -> "OpenRouter API key"
-    LlmProvider.DEEPSEEK -> "DeepSeek API key"
-    LlmProvider.CUSTOM -> "Bearer token (optional)"
+    LlmProvider.ANTHROPIC -> tr("Anthropic API key")
+    LlmProvider.OPENAI -> tr("OpenAI API key")
+    LlmProvider.GEMINI -> tr("Gemini API key")
+    LlmProvider.OPENROUTER -> tr("OpenRouter API key")
+    LlmProvider.DEEPSEEK -> tr("DeepSeek API key")
+    LlmProvider.CUSTOM -> tr("Bearer token (optional)")
 }
 
 internal data class ProviderKeyHelp(val message: String, val linkLabel: String = "", val url: String? = null)
@@ -119,32 +120,32 @@ internal data class ProviderKeyHelp(val message: String, val linkLabel: String =
 /** Where each provider's key comes from. Each key is saved for its own provider only. */
 internal fun providerKeyHelp(provider: LlmProvider): ProviderKeyHelp = when (provider) {
     LlmProvider.GEMINI -> ProviderKeyHelp(
-        "Recommended: fastest here, free tier, no card needed. Saved only for Gemini.",
-        "Get a free Gemini key ↗",
+        tr("Recommended: fastest here, free tier, no card needed. Saved only for Gemini."),
+        tr("Get a free Gemini key ↗"),
         "https://aistudio.google.com/apikey",
     )
     LlmProvider.ANTHROPIC -> ProviderKeyHelp(
-        "Saved only for Claude.",
-        "Create an Anthropic key ↗",
+        tr("Saved only for Claude."),
+        tr("Create an Anthropic key ↗"),
         "https://console.anthropic.com/settings/keys",
     )
     LlmProvider.OPENAI -> ProviderKeyHelp(
-        "Saved only for OpenAI.",
-        "Create an OpenAI key ↗",
+        tr("Saved only for OpenAI."),
+        tr("Create an OpenAI key ↗"),
         "https://platform.openai.com/api-keys",
     )
     LlmProvider.OPENROUTER -> ProviderKeyHelp(
-        "Saved only for OpenRouter.",
-        "Create an OpenRouter key ↗",
+        tr("Saved only for OpenRouter."),
+        tr("Create an OpenRouter key ↗"),
         "https://openrouter.ai/settings/keys",
     )
     LlmProvider.DEEPSEEK -> ProviderKeyHelp(
-        "The default deepseek-flash reads the page image; deepseek-v4-pro gets the text only. Thinking is off for speed. Saved only for DeepSeek.",
-        "Create a DeepSeek key ↗",
+        tr("The default deepseek-flash reads the page image; deepseek-v4-pro gets the text only. Thinking is off for speed. Saved only for DeepSeek."),
+        tr("Create a DeepSeek key ↗"),
         "https://platform.deepseek.com/api_keys",
     )
     LlmProvider.CUSTOM -> ProviderKeyHelp(
-        "Optional bearer token for this endpoint. Old shared keys are never sent here; enter the one meant for this URL.",
+        tr("Optional bearer token for this endpoint. Old shared keys are never sent here; enter the one meant for this URL."),
     )
 }
 
@@ -161,15 +162,15 @@ internal const val MARK = "文⁠A"
 
 /** Fuki's tips, cycled one at a time on the home screen; the first explains hands-free mode. */
 internal val TIPS = listOf(
-    "Hands-free: scroll and I hide; stop and I translate. That's the whole trick.",
-    "Hold the $MARK bubble for the quick menu: translate now, peek at the original, and more.",
-    "Brave private tabs hide the page from me (they go black). Use a normal tab.",
-    "My lettering never blocks touches. Scroll right through it.",
-    "Lines pop in one by one, straight from the AI.",
-    "I remember names as you read, so characters stay who they are.",
-    "Starting another series? Hold $MARK → New series, and I'll forget the old names.",
-    "Pages go only to the AI you picked, nowhere else.",
-    "Loving a raw? Support the official release when it comes out.",
+    tr("Hands-free: scroll and I hide; stop and I translate. That's the whole trick."),
+    tr("Hold the $MARK bubble for the quick menu: translate now, peek at the original, and more."),
+    tr("Brave private tabs hide the page from me (they go black). Use a normal tab."),
+    tr("My lettering never blocks touches. Scroll right through it."),
+    tr("Lines pop in one by one, straight from the AI."),
+    tr("I remember names as you read, so characters stay who they are."),
+    tr("Starting another series? Hold $MARK → New series, and I'll forget the old names."),
+    tr("Pages go only to the AI you picked, nowhere else."),
+    tr("Loving a raw? Support the official release when it comes out."),
 )
 
 /**
@@ -178,7 +179,7 @@ internal val TIPS = listOf(
  */
 internal fun tipsFor(mode: CaptureMode): List<String> =
     if (mode == CaptureMode.AUTO) TIPS
-    else listOf("Tap mode: open a page, tap $MARK, and I letter it. Hands-free lives in Tweaks.") + TIPS.drop(1)
+    else listOf(tr("Tap mode: open a page, tap $MARK, and I letter it. Hands-free lives in Tweaks.")) + TIPS.drop(1)
 
 /** The line Fuki letters to prove a key works: short, warm, and unmistakably Korean. */
 internal const val SAMPLE = "괜찮아. 내가 지켜줄게."
