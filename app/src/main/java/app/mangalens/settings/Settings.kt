@@ -89,7 +89,7 @@ data class AppSettings(
     val targetLang: TargetLang = TargetLang.forLocale(java.util.Locale.getDefault()),
     val mode: CaptureMode = CaptureMode.AUTO,
     val aiVision: AiVisionMode = AiVisionMode.AUTO,
-    val aiReasoning: AiReasoning = AiReasoning.BALANCED,
+    val aiReasoning: AiReasoning = AiReasoning.FAST,
     val dataSaver: Boolean = false,
     /**
      * Lets an image model redraw the art under lettering that sits on the

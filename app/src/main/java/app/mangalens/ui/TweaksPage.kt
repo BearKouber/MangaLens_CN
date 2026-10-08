@@ -752,8 +752,8 @@ private fun MoreOptionsBody(settings: AppSettings, sink: SettingsSink, drafts: A
     Spacer(Modifier.height(8.dp))
     Helper(
         when (settings.aiReasoning) {
-            AiReasoning.FAST -> "Quickest first line. Fine for clean lettering."
-            AiReasoning.BALANCED -> "The best mix of speed and care. Recommended."
+            AiReasoning.FAST -> "Quickest first line. Recommended for comics."
+            AiReasoning.BALANCED -> "A little more care on hard pages, a little slower."
             AiReasoning.THOROUGH -> "Most careful with who's speaking and wild lettering, but slower."
         }
     )

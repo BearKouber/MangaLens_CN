@@ -73,13 +73,13 @@ class SettingsTest {
     }
 
     @Test
-    fun `reasoning defaults to balanced and reads back what was stored`() {
-        assertEquals(AiReasoning.BALANCED, settingsFromPreferences(preferencesOf()).aiReasoning)
+    fun `reasoning defaults to fast and reads back what was stored`() {
+        assertEquals(AiReasoning.FAST, settingsFromPreferences(preferencesOf()).aiReasoning)
         val stored = preferencesOf(stringPreferencesKey("ai_reasoning") to "THOROUGH")
         assertEquals(AiReasoning.THOROUGH, settingsFromPreferences(stored).aiReasoning)
         // An unknown value from a newer build falls back rather than crashing.
         val odd = preferencesOf(stringPreferencesKey("ai_reasoning") to "GALACTIC")
-        assertEquals(AiReasoning.BALANCED, settingsFromPreferences(odd).aiReasoning)
+        assertEquals(AiReasoning.FAST, settingsFromPreferences(odd).aiReasoning)
     }
 
     @Test
