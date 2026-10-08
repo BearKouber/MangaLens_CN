@@ -77,6 +77,7 @@ internal object LlmHttp {
         LlmProvider.OPENAI -> "OpenAI"
         LlmProvider.GEMINI -> "Gemini"
         LlmProvider.OPENROUTER -> "OpenRouter"
+        LlmProvider.DEEPSEEK -> "DeepSeek"
         LlmProvider.CUSTOM -> "Custom AI"
     }
 
@@ -430,6 +431,15 @@ internal object LlmHttp {
                     body.put("reasoning", JSONObject().put("effort", effort))
                 }
                 if (OPENROUTER_DEFAULT_TEMPERATURE.containsMatchIn(model)) greedy = false
+            }
+            // DeepSeek thinks by default and takes an on/off switch rather
+            // than an effort level. Thinking is most of the wait on a page,
+            // so it is switched off; deepseek-reasoner always thinks and
+            // rejects the switch.
+            LlmProvider.DEEPSEEK -> {
+                if (!model.contains("reasoner")) {
+                    body.put("thinking", JSONObject().put("type", "disabled"))
+                }
             }
             else -> Unit
         }

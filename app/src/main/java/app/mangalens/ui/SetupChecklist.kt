@@ -96,7 +96,7 @@ internal fun SetupChecklist(
     browser: String,
     onGrantOverlay: () -> Unit,
     onOpenAiTweaks: () -> Unit,
-    onOpenOtherAi: () -> Unit,
+    onPickProvider: (LlmProvider) -> Unit,
     onTurnOnSolid: () -> Unit,
     onOpenAppInfo: () -> Unit,
     onAllSet: () -> Unit,
@@ -217,7 +217,7 @@ internal fun SetupChecklist(
                 SayHiResult(sayHi.phase, onRetry = { sayHi.runIfReady(drafts.settings) })
             },
         ) {
-            BrainStep(settings, drafts, sayHi, onOpenAiTweaks, onOpenOtherAi)
+            BrainStep(settings, drafts, sayHi, onOpenAiTweaks, onPickProvider)
         }
 
         if (solidOffered) {
@@ -448,7 +448,7 @@ private fun ColumnScope.BrainStep(
     drafts: AiDrafts,
     sayHi: SayHi,
     onOpenAiTweaks: () -> Unit,
-    onOpenOtherAi: () -> Unit,
+    onPickProvider: (LlmProvider) -> Unit,
 ) {
     val pop = LocalPop.current
     val provider = settings.provider
@@ -496,6 +496,16 @@ private fun ColumnScope.BrainStep(
             typed = ""
         }
     }
+
+    // Which AI first, right here: each pick shows its own key link and Paste below.
+    Text("Pick an AI. Gemini is recommended: free and fastest.", style = MaterialTheme.typography.bodyLarge, color = pop.inkSoft)
+    Spacer(Modifier.height(12.dp))
+    ProviderTiles(provider) {
+        notice = null
+        geminiHint = false
+        onPickProvider(it)
+    }
+    Spacer(Modifier.height(16.dp))
 
     if (provider == LlmProvider.CUSTOM) {
         Text(
@@ -578,9 +588,6 @@ private fun ColumnScope.BrainStep(
             StickerButton("Save key", { submit(typed) }, style = StickerStyle.Surface, height = 48.dp)
             Spacer(Modifier.height(4.dp))
         }
-    }
-    if (provider == LlmProvider.GEMINI) {
-        TextLink("Use Claude, OpenAI or another AI →", onOpenOtherAi)
     }
 }
 

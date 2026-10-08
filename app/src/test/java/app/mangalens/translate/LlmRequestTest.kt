@@ -456,4 +456,20 @@ class LlmRequestTest {
         val ms = (System.nanoTime() - t0) / 1_000_000
         assertTrue("cancel took $ms ms", ms < 1_000)
     }
+
+    // ---- DeepSeek ----
+
+    @Test
+    fun `deepseek turns thinking off`() {
+        val ds = openAi(settings(LlmProvider.DEEPSEEK, "deepseek-chat", AiReasoning.THOROUGH))
+        assertEquals("disabled", ds.getJSONObject("thinking").getString("type"))
+        assertFalse("reasoner rejects the switch", openAi(settings(LlmProvider.DEEPSEEK, "deepseek-reasoner")).has("thinking"))
+    }
+
+    @Test
+    fun `only vision-capable models get the page image`() {
+        assertTrue("deepseek-flash sees images", settings(LlmProvider.DEEPSEEK, "").supportsVision())
+        assertFalse(settings(LlmProvider.DEEPSEEK, "deepseek-v4-pro").supportsVision())
+        assertTrue(settings(LlmProvider.ANTHROPIC, "").supportsVision())
+    }
 }

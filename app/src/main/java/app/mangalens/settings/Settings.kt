@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 
-enum class LlmProvider { ANTHROPIC, OPENAI, GEMINI, OPENROUTER, CUSTOM }
+enum class LlmProvider { ANTHROPIC, OPENAI, GEMINI, OPENROUTER, DEEPSEEK, CUSTOM }
 
 /**
  * The language balloons are lettered in. [englishName] is how the AI
@@ -138,7 +138,19 @@ data class AppSettings(
         LlmProvider.OPENAI -> "gpt-4o-mini"
         LlmProvider.GEMINI -> "gemini-flash-latest"
         LlmProvider.OPENROUTER -> "anthropic/claude-sonnet-4.5"
+        LlmProvider.DEEPSEEK -> "deepseek-flash"
         LlmProvider.CUSTOM -> ""
+    }
+
+    /**
+     * Whether the chosen model can be sent the page image. Of DeepSeek's
+     * models only Flash sees images (Pro and the old chat/reasoner names are
+     * text-only); sending them a page would fail every time before
+     * falling back to text.
+     */
+    fun supportsVision(): Boolean = when (provider) {
+        LlmProvider.DEEPSEEK -> effectiveModel().contains("flash", ignoreCase = true)
+        else -> true
     }
 
     fun endpoint(): String = when (provider) {
@@ -146,6 +158,7 @@ data class AppSettings(
         LlmProvider.OPENAI -> "https://api.openai.com/v1/chat/completions"
         LlmProvider.GEMINI -> "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
         LlmProvider.OPENROUTER -> "https://openrouter.ai/api/v1/chat/completions"
+        LlmProvider.DEEPSEEK -> "https://api.deepseek.com/chat/completions"
         LlmProvider.CUSTOM -> customUrl
     }
 }
@@ -187,12 +200,14 @@ private object Keys {
     private val API_KEY_OPENAI = stringPreferencesKey("api_key_openai")
     private val API_KEY_GEMINI = stringPreferencesKey("api_key_gemini")
     private val API_KEY_OPENROUTER = stringPreferencesKey("api_key_openrouter")
+    private val API_KEY_DEEPSEEK = stringPreferencesKey("api_key_deepseek")
     private val API_KEY_CUSTOM = stringPreferencesKey("api_key_custom")
 
     private val MODEL_ANTHROPIC = stringPreferencesKey("model_anthropic")
     private val MODEL_OPENAI = stringPreferencesKey("model_openai")
     private val MODEL_GEMINI = stringPreferencesKey("model_gemini")
     private val MODEL_OPENROUTER = stringPreferencesKey("model_openrouter")
+    private val MODEL_DEEPSEEK = stringPreferencesKey("model_deepseek")
     private val MODEL_CUSTOM = stringPreferencesKey("model_custom")
 
     fun apiKey(provider: LlmProvider): Preferences.Key<String> = when (provider) {
@@ -200,6 +215,7 @@ private object Keys {
         LlmProvider.OPENAI -> API_KEY_OPENAI
         LlmProvider.GEMINI -> API_KEY_GEMINI
         LlmProvider.OPENROUTER -> API_KEY_OPENROUTER
+        LlmProvider.DEEPSEEK -> API_KEY_DEEPSEEK
         LlmProvider.CUSTOM -> API_KEY_CUSTOM
     }
 
@@ -208,6 +224,7 @@ private object Keys {
         LlmProvider.OPENAI -> MODEL_OPENAI
         LlmProvider.GEMINI -> MODEL_GEMINI
         LlmProvider.OPENROUTER -> MODEL_OPENROUTER
+        LlmProvider.DEEPSEEK -> MODEL_DEEPSEEK
         LlmProvider.CUSTOM -> MODEL_CUSTOM
     }
 }

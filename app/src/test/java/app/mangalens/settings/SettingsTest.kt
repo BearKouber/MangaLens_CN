@@ -19,6 +19,7 @@ class SettingsTest {
             LlmProvider.OPENAI -> "api_key_openai"
             LlmProvider.GEMINI -> "api_key_gemini"
             LlmProvider.OPENROUTER -> "api_key_openrouter"
+            LlmProvider.DEEPSEEK -> "api_key_deepseek"
             LlmProvider.CUSTOM -> "api_key_custom"
         }
     )
@@ -29,6 +30,7 @@ class SettingsTest {
             LlmProvider.OPENAI -> "model_openai"
             LlmProvider.GEMINI -> "model_gemini"
             LlmProvider.OPENROUTER -> "model_openrouter"
+            LlmProvider.DEEPSEEK -> "model_deepseek"
             LlmProvider.CUSTOM -> "model_custom"
         }
     )

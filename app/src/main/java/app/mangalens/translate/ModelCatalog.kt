@@ -1,5 +1,7 @@
 package app.mangalens.translate
 
+import app.mangalens.settings.AppSettings
+import app.mangalens.settings.LlmProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.Request
@@ -33,6 +35,45 @@ object ModelCatalog {
     suspend fun gemini(apiKey: String): List<LiveModel> = withContext(Dispatchers.IO) {
         fetchGemini(apiKey)
     }
+
+    /**
+     * The live list for any provider. Every other provider answers GET
+     * `<base>/models` next to its chat endpoint, in the OpenAI shape
+     * (`{"data":[{"id":…}]}`); Anthropic adds a display name.
+     */
+    suspend fun list(settings: AppSettings): List<LiveModel> = withContext(Dispatchers.IO) {
+        if (settings.provider == LlmProvider.GEMINI) return@withContext fetchGemini(settings.apiKey)
+        val builder = Request.Builder().url(modelsUrl(settings.endpoint()))
+        val anthropic = settings.provider == LlmProvider.ANTHROPIC
+        if (anthropic) {
+            LlmHttp.keyHeader(builder, "x-api-key", settings.apiKey).header("anthropic-version", "2023-06-01")
+        } else if (settings.apiKey.isNotBlank()) {
+            LlmHttp.keyHeader(builder, "Authorization", "Bearer " + LlmHttp.cleanKey(settings.apiKey))
+        }
+        LlmHttp.await(LlmHttp.client.newCall(builder.get().build())).use { resp ->
+            if (!resp.isSuccessful) throw IllegalStateException("HTTP ${resp.code}")
+            parseOpenAi(resp.body?.string() ?: "")
+        }
+    }
+
+    /** ".../v1/chat/completions" or ".../v1/messages" → ".../v1/models". */
+    internal fun modelsUrl(endpoint: String): String =
+        endpoint.trimEnd('/').removeSuffix("/chat/completions").removeSuffix("/messages") + "/models"
+
+    /** Chat models from an OpenAI-shaped list, specialty families dropped, sorted by id. */
+    fun parseOpenAi(json: String): List<LiveModel> {
+        val data = JSONObject(json).optJSONArray("data") ?: return emptyList()
+        val out = ArrayList<LiveModel>()
+        for (i in 0 until data.length()) {
+            val m = data.getJSONObject(i)
+            val id = m.optString("id")
+            if (id.isBlank() || (EXCLUDE + OPENAI_EXCLUDE).any { id.contains(it) }) continue
+            out.add(LiveModel(id, m.optString("display_name").ifBlank { id }))
+        }
+        return out.distinctBy { it.id }.sortedBy { it.id }
+    }
+
+    private val OPENAI_EXCLUDE = listOf("whisper", "dall-e", "moderation", "realtime", "search", "babbage", "davinci", "sora")
 
     private suspend fun fetchGemini(apiKey: String): List<LiveModel> {
         val builder = Request.Builder()

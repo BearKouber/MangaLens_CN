@@ -174,4 +174,15 @@ class ModelCatalogTest {
             GeminiApi.base = GeminiApi.BASE
         }
     }
+
+    @Test
+    fun otherProvidersListNextToTheirChatEndpoint() {
+        assertEquals("https://api.deepseek.com/models", ModelCatalog.modelsUrl("https://api.deepseek.com/chat/completions"))
+        assertEquals("https://api.anthropic.com/v1/models", ModelCatalog.modelsUrl("https://api.anthropic.com/v1/messages"))
+        val json = """{"data":[{"id":"gpt-4o-mini"},{"id":"text-embedding-3-small"},{"id":"whisper-1"},
+            {"id":"claude-sonnet-5","display_name":"Claude Sonnet 5"},{"id":"gpt-4o-mini"}]}"""
+        val got = ModelCatalog.parseOpenAi(json)
+        assertEquals(listOf("claude-sonnet-5", "gpt-4o-mini"), got.map { it.id })
+        assertEquals("Claude Sonnet 5", got[0].label)
+    }
 }

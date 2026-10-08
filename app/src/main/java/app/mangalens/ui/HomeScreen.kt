@@ -378,6 +378,7 @@ internal fun HomeContent(
                     onNextTip = { tipIndex++ },
                     onAllSet = onAllSet,
                     openTweaks = openTweaks,
+                    onPickProvider = sink::setProvider,
                 )
             }
         }
@@ -398,6 +399,7 @@ private fun HomePage(
     onNextTip: () -> Unit,
     onAllSet: () -> Unit,
     openTweaks: (TweaksTarget) -> Unit,
+    onPickProvider: (app.mangalens.settings.LlmProvider) -> Unit,
 ) {
     val reduced = LocalReducedMotion.current
     val uri = LocalUriHandler.current
@@ -440,7 +442,7 @@ private fun HomePage(
                         browser = browser,
                         onGrantOverlay = actions.onGrantOverlay,
                         onOpenAiTweaks = { openTweaks(TweaksTarget.AI) },
-                        onOpenOtherAi = { openTweaks(TweaksTarget.OTHER_AI) },
+                        onPickProvider = onPickProvider,
                         onTurnOnSolid = actions.onTurnOnSolid,
                         onOpenAppInfo = actions.onOpenAppInfo,
                         onAllSet = onAllSet,

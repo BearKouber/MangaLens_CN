@@ -110,6 +110,7 @@ internal fun apiKeyLabel(provider: LlmProvider): String = when (provider) {
     LlmProvider.OPENAI -> "OpenAI API key"
     LlmProvider.GEMINI -> "Gemini API key"
     LlmProvider.OPENROUTER -> "OpenRouter API key"
+    LlmProvider.DEEPSEEK -> "DeepSeek API key"
     LlmProvider.CUSTOM -> "Bearer token (optional)"
 }
 
@@ -136,6 +137,11 @@ internal fun providerKeyHelp(provider: LlmProvider): ProviderKeyHelp = when (pro
         "Saved only for OpenRouter.",
         "Create an OpenRouter key ↗",
         "https://openrouter.ai/settings/keys",
+    )
+    LlmProvider.DEEPSEEK -> ProviderKeyHelp(
+        "The default deepseek-flash reads the page image; deepseek-v4-pro gets the text only. Thinking is off for speed. Saved only for DeepSeek.",
+        "Create a DeepSeek key ↗",
+        "https://platform.deepseek.com/api_keys",
     )
     LlmProvider.CUSTOM -> ProviderKeyHelp(
         "Optional bearer token for this endpoint. Old shared keys are never sent here; enter the one meant for this URL.",

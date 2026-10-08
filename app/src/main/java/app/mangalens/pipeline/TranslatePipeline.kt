@@ -310,7 +310,7 @@ class TranslatePipeline(
         // Anchored vision is the quality path for every script — manhwa's
         // stylized/handwritten lettering needs it as much as vertical
         // Japanese does, and it degrades to the text path automatically.
-        val useVision = settings.aiVision != AiVisionMode.OFF
+        val useVision = settings.aiVision != AiVisionMode.OFF && settings.supportsVision()
 
         // Balloons come from the page pixels, so a region exists because the
         // page shows one — not because OCR happened to read something in it.

@@ -78,6 +78,7 @@ import app.mangalens.settings.TargetLang
 import app.mangalens.translate.LlmHttp
 import app.mangalens.translate.ModelCatalog
 import kotlin.math.roundToInt
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -783,19 +784,7 @@ private fun MoreOptionsBody(settings: AppSettings, sink: SettingsSink, drafts: A
         Helper("Gemini is the fastest here and its key is free. Pick another only if you already pay for it.")
     }
     Spacer(Modifier.height(8.dp))
-    PopTiles(
-        listOf(
-            PopTile(LlmProvider.GEMINI, "Gemini", caption = "Free · fastest"),
-            PopTile(LlmProvider.ANTHROPIC, "Claude", caption = "by Anthropic"),
-            PopTile(LlmProvider.OPENAI, "OpenAI", caption = "Paid key"),
-            PopTile(LlmProvider.OPENROUTER, "OpenRouter", caption = "Many models"),
-            PopTile(LlmProvider.CUSTOM, "Custom", caption = "Your own server"),
-        ),
-        selected = provider,
-        onSelect = sink::setProvider,
-        columns = 2,
-        minHeight = 56.dp,
-    )
+    ProviderTiles(provider, sink::setProvider)
     Spacer(Modifier.height(8.dp))
     Helper("The key and, for Custom, the server URL go in Your AI above.")
 
@@ -808,11 +797,30 @@ private fun MoreOptionsBody(settings: AppSettings, sink: SettingsSink, drafts: A
     )
 }
 
+/** The AIs to choose from, Gemini first: shared by setup and Tweaks. */
+@Composable
+internal fun ProviderTiles(selected: LlmProvider, onSelect: (LlmProvider) -> Unit) {
+    PopTiles(
+        listOf(
+            PopTile(LlmProvider.GEMINI, "Gemini", caption = "Free · fastest"),
+            PopTile(LlmProvider.ANTHROPIC, "Claude", caption = "by Anthropic"),
+            PopTile(LlmProvider.OPENAI, "OpenAI", caption = "Paid key"),
+            PopTile(LlmProvider.OPENROUTER, "OpenRouter", caption = "Many models"),
+            PopTile(LlmProvider.DEEPSEEK, "DeepSeek", caption = "The big fish"),
+            PopTile(LlmProvider.CUSTOM, "Custom", caption = "Your own server"),
+        ),
+        selected = selected,
+        onSelect = onSelect,
+        columns = 2,
+        minHeight = 56.dp,
+    )
+}
+
 /**
- * The model: automatic — the newest Flash, which follows Google's releases
- * with no app update — unless the reader picked one. For Gemini it is
- * chosen from the account's live list, never typed; other providers take
- * a model id, blank for their default.
+ * The model: automatic — the provider's default, for Gemini the newest
+ * Flash — unless the reader picked one. Every provider offers its account's
+ * live list, fetched once as soon as a key is in; typing stays available
+ * for models or servers that don't list.
  */
 @Composable
 private fun ModelChoice(drafts: AiDrafts) {
@@ -820,52 +828,84 @@ private fun ModelChoice(drafts: AiDrafts) {
     val s = drafts.settings
     Text("Model", style = MaterialTheme.typography.bodyLarge, color = pop.ink)
     Spacer(Modifier.height(6.dp))
-    if (s.provider == LlmProvider.GEMINI) {
-        val pinned = drafts.model.isNotBlank()
-        Helper(if (pinned) drafts.model else "Automatic: the newest Gemini Flash. Best for almost everyone.")
-        Spacer(Modifier.height(8.dp))
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.Bottom) {
-            GeminiModelPicker(apiKey = drafts.key.trim(), onPick = drafts::editModel, modifier = Modifier.weight(1f))
-            if (pinned) {
-                StickerButton(
-                    "Automatic",
-                    { drafts.editModel("") },
-                    modifier = Modifier.weight(1f),
-                    style = StickerStyle.Surface,
-                    height = 48.dp,
-                    contentDescription = "Use the automatic model",
-                )
-            }
+    val pinned = drafts.model.isNotBlank()
+    val auto = if (s.provider == LlmProvider.GEMINI) "Automatic: the newest Gemini Flash. Best for almost everyone."
+    else "Blank = " + s.copy(model = "").effectiveModel().ifEmpty { "your server's default" }
+    Helper(if (pinned) drafts.model else auto)
+    Spacer(Modifier.height(8.dp))
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.Bottom) {
+        ModelPicker(s, onPick = drafts::editModel, modifier = Modifier.weight(1f))
+        if (pinned) {
+            StickerButton(
+                "Automatic",
+                { drafts.editModel("") },
+                modifier = Modifier.weight(1f),
+                style = StickerStyle.Surface,
+                height = 48.dp,
+                contentDescription = "Use the automatic model",
+            )
         }
-    } else {
+    }
+    if (s.provider != LlmProvider.GEMINI) {
+        Spacer(Modifier.height(8.dp))
         SecretField(
             value = drafts.model,
             onValueChange = drafts::editModel,
             label = "Model",
             secret = false,
             showLabel = false,
-            placeholder = "Blank = " + s.copy(model = "").effectiveModel().ifEmpty { "your server's default" },
+            placeholder = "Or type a model name",
         )
     }
 }
 
 /**
- * Fetches Gemini's live model list on demand and offers it as a menu — the
- * newest Flash first — so the picker shows models released long after this
- * build shipped. Typing in the Model field always stays available. The copy
- * names Gemini, never its maker: to a reader who found the old machine
- * translation useless, the maker's name reads as that engine coming back.
+ * Offers the provider's live model list as a menu, so the picker shows
+ * models released long after this build shipped. The list is fetched once
+ * a key is in (Custom servers may need none), and again on tap if that
+ * failed. The copy names Gemini, never its maker: to a reader who found the
+ * old machine translation useless, the maker's name reads as that engine
+ * coming back.
  */
 @Composable
-private fun GeminiModelPicker(apiKey: String, onPick: (String) -> Unit, modifier: Modifier = Modifier) {
+private fun ModelPicker(settings: AppSettings, onPick: (String) -> Unit, modifier: Modifier = Modifier) {
     val pop = LocalPop.current
     val scope = rememberCoroutineScope()
+    val apiKey = settings.apiKey
+    val canAsk = apiKey.isNotBlank() || settings.provider == LlmProvider.CUSTOM && settings.customUrl.isNotBlank()
     var open by remember { mutableStateOf(false) }
     var loading by remember { mutableStateOf(false) }
+    // The reader tapped and is waiting: only then does the button say so.
+    // The silent fetch after a key goes in leaves the button alone, so it
+    // doesn't flash.
+    var waiting by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
-    var models by remember { mutableStateOf<List<ModelCatalog.LiveModel>>(emptyList()) }
     var width by remember { mutableStateOf(0.dp) }
     val density = LocalDensity.current
+    var models by remember(settings.provider, apiKey, settings.customUrl) { mutableStateOf<List<ModelCatalog.LiveModel>>(emptyList()) }
+    suspend fun fetch() {
+        loading = true
+        try {
+            models = ModelCatalog.list(settings)
+            error = if (models.isEmpty()) "No usable models came back." else null
+            open = waiting && models.isNotEmpty()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            error = "Couldn't fetch models: " + (e.message ?: "network error")
+        } finally {
+            loading = false
+            waiting = false
+        }
+    }
+    // Once per provider and key: the list is ready by the time the menu is tapped.
+    LaunchedEffect(settings.provider, apiKey, settings.customUrl) {
+        error = null
+        if (canAsk) {
+            delay(600)
+            fetch()
+        }
+    }
     // The error sits above the button, not beside it, so the button keeps its size.
     Column(modifier) {
         error?.let {
@@ -874,30 +914,21 @@ private fun GeminiModelPicker(apiKey: String, onPick: (String) -> Unit, modifier
         }
         Box(Modifier.fillMaxWidth().onSizeChanged { width = with(density) { it.width.toDp() } }) {
             StickerButton(
-                if (loading) "Asking Gemini…" else "Choose a model ▾",
+                if (waiting) "Asking ${LlmHttp.providerLabel(settings)}…" else "Choose a model ▾",
                 {
-                    if (loading) return@StickerButton
-                    if (apiKey.isBlank()) {
+                    if (!canAsk) {
                         error = "Add your key first. The list comes from your account."
                         return@StickerButton
                     }
-                    error = null
                     if (models.isNotEmpty()) {
                         open = true
                         return@StickerButton
                     }
-                    loading = true
-                    scope.launch {
-                        try {
-                            models = ModelCatalog.gemini(apiKey)
-                            open = models.isNotEmpty()
-                            if (models.isEmpty()) error = "Gemini returned no usable models."
-                        } catch (e: Exception) {
-                            error = "Couldn't fetch models: " + (e.message ?: "network error")
-                        } finally {
-                            loading = false
-                        }
-                    }
+                    if (waiting) return@StickerButton
+                    waiting = true
+                    if (loading) return@StickerButton // the silent fetch opens the menu when it lands
+                    error = null
+                    scope.launch { fetch() }
                 },
                 style = StickerStyle.Surface,
                 height = 48.dp,
@@ -917,7 +948,7 @@ private fun GeminiModelPicker(apiKey: String, onPick: (String) -> Unit, modifier
                         text = {
                             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                                 Text(m.label, style = MaterialTheme.typography.titleMedium, color = pop.ink)
-                                Text(m.id, style = MonoStyle.copy(fontSize = 14.sp), color = pop.inkSoft)
+                                if (m.label != m.id) Text(m.id, style = MonoStyle.copy(fontSize = 14.sp), color = pop.inkSoft)
                             }
                         },
                         onClick = {
