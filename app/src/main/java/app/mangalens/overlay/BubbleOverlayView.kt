@@ -10,6 +10,10 @@ import android.graphics.PorterDuffColorFilter
 import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.Typeface
+import android.graphics.fonts.Font
+import android.graphics.fonts.FontFamily
+import android.graphics.fonts.FontStyle
+import android.os.Build
 import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
@@ -572,20 +576,42 @@ class BubbleOverlayView(context: Context) : View(context) {
         }
 
     /**
+     * Comic Neue has no Chinese or Japanese glyphs, and the platform face
+     * that would stand in for them reads as a system dialog, not a comic.
+     * LXGW Marker Gothic, a marker-pen hand of the same spirit, is chained
+     * behind each face, so Latin stays Comic Neue and only the characters it
+     * lacks fall through. Loaded once and shared: the file is 3 MB.
+     */
+    private val cjkFamily: FontFamily? by lazy {
+        if (Build.VERSION.SDK_INT < 29) null
+        else runCatching { FontFamily.Builder(Font.Builder(resources, R.font.lxgw_marker_gothic).build()).build() }.getOrNull()
+    }
+
+    /**
      * Comic Neue is the lettering hand; the platform faces stand in when a
      * resource fails to inflate, so a broken font asset costs the page its
      * look but never its text. Loaded once — font inflation parses the file
      * on every call.
      */
     private val boldFace: Typeface =
-        font(R.font.comic_neue_bold) ?: Typeface.create("sans-serif-medium", Typeface.NORMAL)
+        font(R.font.comic_neue_bold, 700, false) ?: Typeface.create("sans-serif-medium", Typeface.NORMAL)
     private val regularFace: Typeface =
-        font(R.font.comic_neue_regular) ?: Typeface.create("sans-serif", Typeface.NORMAL)
+        font(R.font.comic_neue_regular, 400, false) ?: Typeface.create("sans-serif", Typeface.NORMAL)
     private val boldItalicFace: Typeface =
-        font(R.font.comic_neue_bold_italic) ?: Typeface.create("sans-serif-condensed", Typeface.BOLD_ITALIC)
+        font(R.font.comic_neue_bold_italic, 700, true) ?: Typeface.create("sans-serif-condensed", Typeface.BOLD_ITALIC)
 
-    private fun font(id: Int): Typeface? =
-        runCatching { ResourcesCompat.getFont(context, id) }.getOrNull()
+    // Android 8–9 has no custom fallback, so CJK there uses the platform face.
+    private fun font(id: Int, weight: Int, italic: Boolean): Typeface? {
+        val base = runCatching { ResourcesCompat.getFont(context, id) }.getOrNull() ?: return null
+        if (Build.VERSION.SDK_INT < 29) return base
+        val cjk = cjkFamily ?: return base
+        return runCatching {
+            Typeface.CustomFallbackBuilder(FontFamily.Builder(Font.Builder(resources, id).build()).build())
+                .addCustomFallback(cjk)
+                .setStyle(FontStyle(weight, if (italic) FontStyle.FONT_SLANT_ITALIC else FontStyle.FONT_SLANT_UPRIGHT))
+                .build()
+        }.getOrDefault(base)
+    }
 
     /**
      * Thoughts lean but keep dialogue's weight, as a scanlation sets them:
