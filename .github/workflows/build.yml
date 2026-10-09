@@ -2,7 +2,7 @@ name: build
 
 on:
   push:
-    branches: [main]
+    branches: [main, cn]
     paths-ignore:
       - "site/**"
       - "marketing/**"
