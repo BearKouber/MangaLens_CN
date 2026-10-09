@@ -30,7 +30,7 @@ object UpdateChecker {
     private const val PRIMARY_APK = "MangaLens.apk"
     private const val LEGACY_BRIDGE_APK = "MangaLens-legacy-update.apk"
     private const val RELEASE_CERT_SHA256 =
-        "6bde3720dc055d1f233970e4c038cb5955d816a6353c557aa59689742ab75ab6"
+        "069fb2dc057ed135758ce22af4ae8a0fa91ed13a18a93072d5062487f7b03217"
     private const val LEGACY_DEBUG_CERT_SHA256 =
         "df0e8ef059da2b1bb121e49252a07c55e468fb4453a4fbb7d90263d3c7b7a344"
 

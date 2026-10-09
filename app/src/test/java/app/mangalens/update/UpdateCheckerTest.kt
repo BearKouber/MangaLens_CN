@@ -111,7 +111,7 @@ class UpdateCheckerTest {
     fun `pinned certificate digests select their signing tracks`() {
         assertEquals(
             UpdateChecker.SigningTrack.RELEASE,
-            UpdateChecker.signingTrack("6BDE3720DC055D1F233970E4C038CB5955D816A6353C557AA59689742AB75AB6"),
+            UpdateChecker.signingTrack("069FB2DC057ED135758CE22AF4AE8A0FA91ED13A18A93072D5062487F7B03217"),
         )
         assertEquals(
             UpdateChecker.SigningTrack.LEGACY_DEBUG,

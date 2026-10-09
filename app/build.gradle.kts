@@ -12,8 +12,8 @@ android {
         applicationId = "app.mangalens.cn"
         minSdk = 26
         targetSdk = 35
-        versionCode = 39
-        versionName = "1.1.4"
+        versionCode = 3901
+        versionName = "1.1.4.1"
 
         ndk {
             // Every modern tablet is arm64; dropping the other ABIs takes the
