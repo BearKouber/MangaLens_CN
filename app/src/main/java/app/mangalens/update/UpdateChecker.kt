@@ -23,7 +23,7 @@ import org.json.JSONObject
  */
 object UpdateChecker {
 
-    const val REPO = "mkisontop/mangalens"
+    const val REPO = "BearKouber/MangaLens_CN"
     const val LATEST_URL = "https://github.com/$REPO/releases/latest"
     private const val API = "https://api.github.com/repos/$REPO/releases/latest"
 

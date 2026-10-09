@@ -100,7 +100,7 @@ class LetteringHostTest {
         assertFalse(LetteringHost.isOn(context))
         Settings.Secure.putString(resolver, key, "com.example.reader/.ReaderService")
         assertFalse(LetteringHost.isOn(context))
-        Settings.Secure.putString(resolver, key, "com.example.reader/.ReaderService:" + service.flattenToString())
+        Settings.Secure.putString(resolver, key, "com.example.reader/.ReaderService:" + ComponentName(context, LetteringHostService::class.java).flattenToString())
         assertTrue(LetteringHost.isOn(context))
 
         // Connected before the setting has caught up still counts.

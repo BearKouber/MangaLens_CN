@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">MangaLens</string>
+    <string name="app_name">MangaLens_CN</string>
 
     <!-- The lettering host's line and page in Accessibility settings (see LetteringHostService). -->
     <string name="lettering_host_summary">Draws MangaLens\'s English at full strength</string>

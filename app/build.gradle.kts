@@ -9,7 +9,7 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "app.mangalens"
+        applicationId = "app.mangalens.cn"
         minSdk = 26
         targetSdk = 35
         versionCode = 39

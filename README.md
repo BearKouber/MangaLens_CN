@@ -1,7 +1,10 @@
-# MangaLens 文A
+# MangaLens_CN 文A
 
-[![build](https://github.com/mkisontop/mangalens/actions/workflows/build.yml/badge.svg)](https://github.com/mkisontop/mangalens/actions/workflows/build.yml)
-[![release](https://img.shields.io/github/v/release/mkisontop/mangalens?label=release)](https://github.com/mkisontop/mangalens/releases/latest)
+> 这是 [mkisontop/mangalens](https://github.com/mkisontop/mangalens) 的中文分支（fork）：加了中文/日/韩/俄译文、中文界面、中文字体和 DeepSeek。
+> 原项目的全部功能和设计归原作者所有，按 MIT 许可证使用。中文版的问题请在本仓库反馈，不要打扰原作者。
+> 可以和原版 MangaLens 同时安装。
+
+[![release](https://img.shields.io/github/v/release/BearKouber/MangaLens_CN?label=release)](https://github.com/BearKouber/MangaLens_CN/releases/latest)
 [![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 **Live on-screen translation for raw manhwa, manga and manhua on Android.**
